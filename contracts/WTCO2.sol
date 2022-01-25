@@ -11,7 +11,6 @@ import "https://github.com/CO2ken/contracts/blob/602ac834cd18b6bd9d863ed8c5b6f9b
  */
 
 contract WTCO2 is ToucanCarbonOffsets {
-  string private greeting;
   uint256 private footprint;
 
   string public name = "Wrapped TCO2";
@@ -20,21 +19,6 @@ contract WTCO2 is ToucanCarbonOffsets {
 
   event Deposit(address indexed sender, uint256 amount);
   event Withdrawal(address indexed recipient, uint256 amount);
-
-  // TODO: NEED CLARITY #1. I'm not really sure why we need HelloWorld functionality 🤷🏻‍♂️
-  constructor(string memory _greeting) {
-    console.log("Deploying a Greeter with greeting:", _greeting);
-    greeting = _greeting;
-  }
-
-  function greet() public view returns (string memory) {
-    return greeting;
-  }
-
-  function setGreeting(string memory _greeting) public {
-    console.log("Changing greeting from '%s' to '%s'", greeting, _greeting);
-    greeting = _greeting;
-  }
 
   // TODO this is hardcoded for now
   function calculateFootprint() public pure returns (uint256) {
