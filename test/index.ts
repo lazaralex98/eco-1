@@ -1,5 +1,7 @@
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { WTCO2, WTCO2__factory } from "../typechain";
 
 /**
  * TODO: obviously all this is not working because I have no artifacts because I cannot compile
