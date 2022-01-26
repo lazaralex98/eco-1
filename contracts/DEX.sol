@@ -6,7 +6,7 @@ import "hardhat/console.sol";
 import "./CO2KEN_contracts/ToucanCarbonOffsets.sol";
 import "./CO2KEN_contracts/pools/BaseCarbonTonne.sol";
 
-contract WTCO2 {
+contract DEX {
   uint256 private footprint;
   ToucanCarbonOffsets public tco;
   event Retirement(address indexed sender, uint256 amount);
