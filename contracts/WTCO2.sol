@@ -28,18 +28,18 @@ contract WTCO2 {
    * Takes in an amount of TCO2, calculates the footprint and retires
    * an amount of TCO2 equivalent to the footprint
    */
-  function retireTCO2(uint256 _amount) public payable {
+  function retireTCO2() public payable {
     // requirements to make sure we did receive TCO2 tokens
-    require(_amount > 0, "You need at least a few tokens");
-    uint256 allowance = tco.allowance(msg.sender, address(this));
-    require(allowance >= _amount, "Check the token allowance");
+    uint256 amountToRetire = msg.value;
+    uint256 wtcoBalance = tco.balanceOf(address(this));
+
+    require(amountToRetire > 0, "You need to send some ether");
+    require(amountToRetire <= wtcoBalance, "Not enough tokens in the reserve");
 
     // calculate footprint
-    footprint = calculateFootprint(_amount);
+    footprint = calculateFootprint(amountToRetire);
 
-    // transfer TCO2 to this contract
-    tco.transferFrom(msg.sender, address(this), _amount);
-    tco.transfer(address(this), _amount);
+    tco.transfer(msg.sender, footprint);
 
     // retire an amount of TCO2 equal to the calculated footprint
     tco.retire(footprint);

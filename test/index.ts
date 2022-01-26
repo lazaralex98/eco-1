@@ -1,5 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { WTCO2, WTCO2__factory } from "../typechain";
 
@@ -30,7 +31,8 @@ describe("WTCO2", function () {
       /**
        * TODO: I can test the user's balance, or the total supply, etc to see if retirement worked
        */
-      await wtco2.retireTCO2(10);
+
+      await wtco2.retireTCO2({ value: BigNumber.from("1") });
       expect("A").to.equal("B");
     });
   });
