@@ -16,12 +16,8 @@ contract DEX {
   }
 
   // TODO: this is hardcoded for now
-  function calculateFootprint(uint256 _tokenAmount)
-    public
-    pure
-    returns (uint256)
-  {
-    return _tokenAmount;
+  function calculateFootprint(uint256 _amount) public pure returns (uint256) {
+    return _amount;
   }
 
   /**
@@ -29,15 +25,15 @@ contract DEX {
    * an amount of TCO2 equivalent to the footprint
    */
   function retireTCO2() public payable {
-    uint256 amountToRetire = msg.value;
+    uint256 amountReceived = msg.value;
     uint256 wtcoBalance = tco.balanceOf(address(this));
 
     // requirements to make sure we did receive TCO2 tokens
-    require(amountToRetire > 0, "You need to send some ether");
-    require(amountToRetire <= wtcoBalance, "Not enough tokens in the reserve");
+    require(amountReceived > 0, "You need to send some ether");
+    require(amountReceived <= wtcoBalance, "Not enough tokens in the reserve");
 
     // calculate footprint
-    footprint = calculateFootprint(amountToRetire);
+    footprint = calculateFootprint(amountReceived);
 
     tco.transfer(msg.sender, footprint);
 

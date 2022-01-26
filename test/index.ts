@@ -31,6 +31,7 @@ describe("WTCO2", function () {
       /**
        * TODO: I can test the user's balance, or the total supply, etc to see if retirement worked
        */
+      // Error: Not enough tokens in the reserve
       await dex.retireTCO2({ value: BigNumber.from("1") });
       expect("A").to.equal("B");
     });
