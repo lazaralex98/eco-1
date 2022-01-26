@@ -29,10 +29,10 @@ contract DEX {
    * an amount of TCO2 equivalent to the footprint
    */
   function retireTCO2() public payable {
-    // requirements to make sure we did receive TCO2 tokens
     uint256 amountToRetire = msg.value;
     uint256 wtcoBalance = tco.balanceOf(address(this));
 
+    // requirements to make sure we did receive TCO2 tokens
     require(amountToRetire > 0, "You need to send some ether");
     require(amountToRetire <= wtcoBalance, "Not enough tokens in the reserve");
 
