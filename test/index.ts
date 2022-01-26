@@ -1,19 +1,35 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("Greeter", function () {
-  it("Should return the new greeting once it's changed", async function () {
-    const Greeter = await ethers.getContractFactory("Greeter");
-    const greeter = await Greeter.deploy("Hello, world!");
-    await greeter.deployed();
+/**
+ * TODO: obviously all this is not working because I have no artifacts because I cannot compile
+ * BECAUSE I cannot import the needed contracts via https
+ */
 
-    expect(await greeter.greet()).to.equal("Hello, world!");
+describe("WTCO2", function () {
+  let wtco2: WTCO2;
+  let owner: SignerWithAddress;
+  let addr1: SignerWithAddress;
+  let addr2: SignerWithAddress;
+  let addrs: SignerWithAddress[];
 
-    const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
+  beforeEach(async function () {
+    [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
-    // wait until the transaction is mined
-    await setGreetingTx.wait();
+    const wtco2Factory = (await ethers.getContractFactory(
+      "WTCO2",
+      owner
+    )) as WTCO2__factory;
+    wtco2 = await wtco2Factory.deploy();
+  });
 
-    expect(await greeter.greet()).to.equal("Hola, mundo!");
+  describe("Deployment", function () {
+    it("Should ...", async function () {
+      /**
+       * TODO: I can test the user's balance, or the total supply, etc to see if retirement worked
+       */
+      await wtco2.retireTCO2(10);
+      expect("A").to.equal("B");
+    });
   });
 });
