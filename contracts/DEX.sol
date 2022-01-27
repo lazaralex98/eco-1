@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 // You can't import contracts via https from GH. So I just copied these contracts over.
 // You could use NPM publish, but this works for now.
 import "./CO2KEN_contracts/ToucanCarbonOffsets.sol";
@@ -18,7 +18,7 @@ contract DEX {
   mapping(address => uint256) public tokenBalances;
   event Deposited(address erc20Addr, uint256 amount);
   // this is the address for Mumbai
-  address constant private tco2Address = "0xf2438A14f668b1bbA53408346288f3d7C71c10a1";
+  address constant private tco2Address = 0xf2438A14f668b1bbA53408346288f3d7C71c10a1;
   address private owner;
 
   constructor ()  {
@@ -31,10 +31,10 @@ contract DEX {
   }
 
   /* @notice Internal function that checks if token to be deposited is eligible for this pool
-   * this can be changed in the future to contain other tokens
    * @param _erc20Address ERC20 contract address to be checked
+   * this can be changed in the future to contain other tokens
    */
-  function checkEligible(address _erc20Address) {
+  function checkEligible(address _erc20Address) public pure returns (bool) {
     if (_erc20Address == tco2Address) return true;
     return false;
   }
@@ -49,7 +49,7 @@ contract DEX {
     require(checkEligible(_erc20Address), "Token rejected");
 
     // use TCO contract to do a safe transfer from the user to this contract
-    IERC20(_erc20Address).safeTransferFrom(msg.sender, address(this), _amount);
+    IERC721(_erc20Address).safeTransferFrom(msg.sender, address(this), _amount);
 
     // add amount of said token to balance sheet of this contract
     tokenBalances[_erc20Address] += _amount;
@@ -69,6 +69,6 @@ contract DEX {
 
     footprint = _calculateFootprint(_amount);
 
-    ToucanCarbonOffsets(_erc20Address).retire(footprint);
+    ToucanCarbonOffsets(tco2Address).retire(footprint);
   }
 }
