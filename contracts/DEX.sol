@@ -17,8 +17,8 @@ contract DEX {
   uint256 private footprint;
   mapping(address => uint256) public tokenBalances;
   event Deposited(address erc20Addr, uint256 amount);
-  // TODO need to find TCO2 contract's address
-  address constant private tco2Address = "TCO2_address";
+  // this is the address for Mumbai
+  address constant private tco2Address = "0xf2438A14f668b1bbA53408346288f3d7C71c10a1";
   address private owner;
 
   constructor ()  {
