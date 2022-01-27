@@ -2,45 +2,73 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
-// I've no idea how to import from Github. So I just copied these contracts over
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+// You can't import contracts via https from GH. So I just copied these contracts over.
+// You could use NPM publish, but this works for now.
 import "./CO2KEN_contracts/ToucanCarbonOffsets.sol";
 import "./CO2KEN_contracts/pools/BaseCarbonTonne.sol";
 
+/* TODO (long term structure)
+ * receive WETH, MATIC, USDC or BCT
+ *  if WETH, MATIC or USDC -> buy BCT from Sushiswap
+ *  if BCT -> redeem BCT for TCO2 -> retire TCO2
+ */
 contract DEX {
   uint256 private footprint;
-  ToucanCarbonOffsets public tco;
-  event Retirement(address indexed sender, uint256 amount);
+  mapping(address => uint256) public tokenBalances;
+  event Deposited(address erc20Addr, uint256 amount);
+  // TODO need to find TCO2 contract's address
+  address constant private tco2Address = "TCO2_address";
+  address private owner;
 
-  constructor() {
-    tco = new ToucanCarbonOffsets();
+  constructor ()  {
+    owner = msg.sender;
   }
 
-  // TODO: this is hardcoded for now
-  function calculateFootprint(uint256 _amount) public pure returns (uint256) {
+  // TODO: this is hardcoded for now, but it should do some carbon emission math to return the footprint
+  function _calculateFootprint(uint256 _amount) private pure returns (uint256) {
     return _amount;
   }
 
-  /**
-   * Takes in an amount of TCO2, calculates the footprint and retires
-   * an amount of TCO2 equivalent to the footprint
+  /* @notice Internal function that checks if token to be deposited is eligible for this pool
+   * this can be changed in the future to contain other tokens
+   * @param _erc20Address ERC20 contract address to be checked
    */
-  function retireTCO2() public payable {
-    uint256 amountReceived = msg.value;
-    uint256 wtcoBalance = tco.balanceOf(address(this));
+  function checkEligible(address _erc20Address) {
+    if (_erc20Address == tco2Address) return true;
+    return false;
+  }
 
-    // requirements to make sure we did receive TCO2 tokens
-    require(amountReceived > 0, "You need to send some ether");
-    require(amountReceived <= wtcoBalance, "Not enough tokens in the reserve");
+  /* @notice function to deposit tokens from user to this contract
+   * @param _erc20Address ERC20 contract address to be deposited
+   * @param _amount amount to be deposited
+   * in the long run, this will modified to adapt to the structure mentioned above
+   */
+  function deposit(address _erc20Address, uint256 _amount) public {
+    // check token eligibility
+    require(checkEligible(_erc20Address), "Token rejected");
 
-    // calculate footprint
-    footprint = calculateFootprint(amountReceived);
+    // use TCO contract to do a safe transfer from the user to this contract
+    IERC20(_erc20Address).safeTransferFrom(msg.sender, address(this), _amount);
 
-    tco.transfer(msg.sender, footprint);
+    // add amount of said token to balance sheet of this contract
+    tokenBalances[_erc20Address] += _amount;
 
-    // retire an amount of TCO2 equal to the calculated footprint
-    tco.retire(footprint);
+    // emit an event for good measure
+    emit Deposited(_erc20Address, _amount);
+  }
 
-    // emit a Retirement event
-    emit Retirement(msg.sender, footprint);
+  /* @notice retires that amount from its balance
+   * @param _amount to be retired
+   * TODO: question. Should users be able to call this if they are not the owner of the contract?
+   */
+  function retireTCO2(uint256 _amount) public {
+//    require(msg.sender == owner, "Only use this if you are the contract owner.");
+
+    require(_amount <= tokenBalances[tco2Address], "Can't retire more than we hold.");
+
+    footprint = _calculateFootprint(_amount);
+
+    ToucanCarbonOffsets(_erc20Address).retire(footprint);
   }
 }
