@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 // You can't import contracts via https from GH. So I just copied these contracts over.
 // You could use NPM publish, but this works for now.
 import "./CO2KEN_contracts/ToucanCarbonOffsets.sol";
@@ -14,15 +14,20 @@ import "./CO2KEN_contracts/pools/BaseCarbonTonne.sol";
  *  if BCT -> redeem BCT for TCO2 -> retire TCO2
  */
 contract DEX {
+  using SafeERC20 for IERC20;
+
   uint256 private footprint;
-  mapping(address => uint256) public tokenBalances;
+  mapping(address => uint256) private tokenBalances;
   event Deposited(address erc20Addr, uint256 amount);
-  // this is the address for Mumbai
-  address constant private tco2Address = 0xf2438A14f668b1bbA53408346288f3d7C71c10a1;
+  address private tco2Address = 0x788d12e9f6E5D65a0Fa4C3f5D6AA34Ef39A6E582;
   address private owner;
 
   constructor ()  {
     owner = msg.sender;
+  }
+
+  function getTokenBalance(address _erc20Address) public view returns (uint256) {
+    return tokenBalances[_erc20Address];
   }
 
   // TODO: this is hardcoded for now, but it should do some carbon emission math to return the footprint
@@ -34,7 +39,7 @@ contract DEX {
    * @param _erc20Address ERC20 contract address to be checked
    * this can be changed in the future to contain other tokens
    */
-  function checkEligible(address _erc20Address) public pure returns (bool) {
+  function checkEligible(address _erc20Address) public view returns (bool) {
     if (_erc20Address == tco2Address) return true;
     return false;
   }
@@ -49,7 +54,7 @@ contract DEX {
     require(checkEligible(_erc20Address), "Token rejected");
 
     // use TCO contract to do a safe transfer from the user to this contract
-    IERC721(_erc20Address).safeTransferFrom(msg.sender, address(this), _amount);
+    IERC20(_erc20Address).safeTransferFrom(msg.sender, address(this), _amount);
 
     // add amount of said token to balance sheet of this contract
     tokenBalances[_erc20Address] += _amount;
