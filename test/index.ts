@@ -35,6 +35,7 @@ describe("DEX", function () {
     tco = new ethers.Contract(tco2Address, tcoAbi.abi, owner);
   });
 
+  // TODO Why is it taking sooo looong?!?
   describe("Deposit", function () {
     it("Should deposit 1 TCO2", async function () {
       // first we use have the TCO2 contract approve up to 1 unit to be used by the DEX contract
@@ -49,10 +50,12 @@ describe("DEX", function () {
         }
       );
       await depositTxn.wait();
-      console.log(depositTxn);
+
+      // TODO sometimes I'm getting a code=REPLACEMENT_UNDERPRICED
 
       // if everything goes well,
-      expect(depositTxn).to.eql(2);
+      const balance = await dex.getTokenBalance(tco2Address);
+      expect(ethers.utils.formatEther(balance)).to.eql("1.0");
     });
   });
 });
