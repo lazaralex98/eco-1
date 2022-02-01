@@ -35,7 +35,7 @@ describe("DEX", function () {
     tco = new ethers.Contract(tco2Address, tcoAbi.abi, owner);
   });
 
-  // TODO Why is it taking sooo looong?!?
+  // TODO Why is it taking sooo looong?!? (sometimes up to 6 minutes)
   describe("Deposit", function () {
     it("Should deposit 1 TCO2", async function () {
       // first we use have the TCO2 contract approve up to 1 unit to be used by the DEX contract
