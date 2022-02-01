@@ -55,9 +55,6 @@ contract DEX {
     bool eligibility = checkEligible(_erc20Address);
     require(eligibility, "Token rejected");
 
-    // set allowance
-    IERC20(_erc20Address).approve(msg.sender, _amount);
-
     // use TCO contract to do a safe transfer from the user to this contract
     IERC20(_erc20Address).safeTransferFrom(msg.sender, address(this), _amount);
 

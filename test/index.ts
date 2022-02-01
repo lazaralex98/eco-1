@@ -31,23 +31,9 @@ describe("DEX", function () {
     tco = new ethers.Contract(tco2Address, tcoAbi.abi, owner);
   });
 
-  describe("TCO2", function () {
-    // TODO why does this take so loong ?!?
-    return;
-    // eslint-disable-next-line no-unreachable
-    it("Allowance should be above 1", async function () {
-      const txn = await tco.increaseAllowance(
-        owner.address,
-        ethers.utils.parseEther("1")
-      );
-      await txn.wait();
-      const allowance = await tco.allowance(owner.address, owner.address);
-      expect(parseFloat(ethers.utils.formatEther(allowance))).to.be.above(1);
-    });
-  });
-
   describe("Deposit", function () {
     it("Should deposit 1 TCO2", async function () {
+      tco.approve(dex.address, ethers.utils.parseEther("1"));
       const depositTxn = await dex.deposit(
         tco2Address,
         ethers.utils.parseEther("1"),
