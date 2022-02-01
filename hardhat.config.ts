@@ -37,7 +37,9 @@ const config: HardhatUserConfig = {
     matic: {
       url: process.env.MUMBAI_URL || "",
       accounts:
-        process.env.MUMBAI_PRIVATE_KEY !== undefined ? [process.env.MUMBAI_PRIVATE_KEY] : [],
+        process.env.MUMBAI_PRIVATE_KEY !== undefined
+          ? [process.env.MUMBAI_PRIVATE_KEY]
+          : [],
     },
   },
 };

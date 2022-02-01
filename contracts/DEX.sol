@@ -16,14 +16,15 @@ import "./CO2KEN_contracts/pools/BaseCarbonTonne.sol";
 contract DEX {
   using SafeERC20 for IERC20;
 
-  uint256 private footprint;
+  uint256 public footprint;
+  address public tco2Address;
+  address public owner;
   mapping(address => uint256) private tokenBalances;
   event Deposited(address erc20Addr, uint256 amount);
-  address private tco2Address = 0x788d12e9f6E5D65a0Fa4C3f5D6AA34Ef39A6E582;
-  address private owner;
 
-  constructor ()  {
+  constructor (address _tco2Address)  {
     owner = msg.sender;
+    tco2Address = _tco2Address;
   }
 
   function getTokenBalance(address _erc20Address) public view returns (uint256) {
@@ -51,9 +52,11 @@ contract DEX {
    */
   function deposit(address _erc20Address, uint256 _amount) public {
     // check token eligibility
-    require(checkEligible(_erc20Address), "Token rejected");
+    bool eligibility = checkEligible(_erc20Address);
+    require(eligibility, "Token rejected");
 
     // use TCO contract to do a safe transfer from the user to this contract
+    // TODO fails because your contract is trying to spend the tokenHolder's
     IERC20(_erc20Address).safeTransferFrom(msg.sender, address(this), _amount);
 
     // add amount of said token to balance sheet of this contract
@@ -67,7 +70,7 @@ contract DEX {
    * @param _amount to be retired
    * TODO: question. Should users be able to call this if they are not the owner of the contract?
    */
-  function retireTCO2(uint256 _amount) public {
+  function retireTCO2(uint256 _amount) external {
 //    require(msg.sender == owner, "Only use this if you are the contract owner.");
 
     require(_amount <= tokenBalances[tco2Address], "Can't retire more than we hold.");
