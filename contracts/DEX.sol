@@ -55,8 +55,10 @@ contract DEX {
     bool eligibility = checkEligible(_erc20Address);
     require(eligibility, "Token rejected");
 
+    // set allowance
+    IERC20(_erc20Address).approve(msg.sender, _amount);
+
     // use TCO contract to do a safe transfer from the user to this contract
-    // TODO fails because your contract is trying to spend the tokenHolder's
     IERC20(_erc20Address).safeTransferFrom(msg.sender, address(this), _amount);
 
     // add amount of said token to balance sheet of this contract
