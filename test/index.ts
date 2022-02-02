@@ -53,6 +53,12 @@ describe("DEX", function () {
   describe("Deposit", function () {
     it("Should deposit 1 TCO2", async function () {
       /**
+       * we check the my TCO2 before depositing some of it
+       */
+      const myTcoBalanceBefore = await tco.balanceOf(myAddress);
+      console.log("total supply before retirement:", myTcoBalanceBefore);
+
+      /**
        * we attempt to deposit 1 TCO2 into the DEX contract.
        * I have separated in the deposit() function for readability
        */
@@ -60,16 +66,28 @@ describe("DEX", function () {
       expect(depositTxn.confirmations).to.be.above(0);
 
       /**
+       * TODO we check the my TCO2 after depositing some of it
+       */
+      const myTcoBalanceAfter = await tco.balanceOf(myAddress);
+      console.log("tco supply after retirement:", myTcoBalanceAfter);
+
+      /**
        * we check the TCO2 balance of the contract to see if it changed.
        * Normally it should be equal to 1.0 as we redeploy a new DEX contract before each test.
        */
-      const balance = await dex.getTokenBalance(tco2Address);
-      expect(ethers.utils.formatEther(balance)).to.eql("1.0");
+      const dexTcoBalance = await dex.getTokenBalance(tco2Address);
+      expect(ethers.utils.formatEther(dexTcoBalance)).to.eql("1.0");
     });
   });
 
   describe("Retire TCO2", function () {
     it("Should retire 1 TCO2 from contract balance", async function () {
+      /**
+       * we check the total TCO2 supply before depositing and retiring some of it
+       */
+      const totalSupplyBefore = await tco.totalSupply();
+      console.log("total supply before retirement:", totalSupplyBefore);
+
       /**
        * we deposit 1 TCO2 to the DEX contract and then get the balance of the DEX contract.
        * we are expecting it to be equal to 1.0 as we redeploy a new DEX contract before each test.
@@ -87,13 +105,17 @@ describe("DEX", function () {
       await retireTxn.wait();
       expect(retireTxn.confirmations).to.be.above(0);
 
-      // TODO check from TCO2 contract too
+      /**
+       * TODO we check the total TCO2 supply after depositing and retiring some of it
+       */
+      const tcoSupplyAfter = await tco.totalSupply();
+      console.log("tco supply after retirement:", tcoSupplyAfter);
 
       /**
-       * we check the balance and it should be now equal to 0
+       * we check the DEX contract's TCO2 balance after the operations were done
        */
-      const afterBalance = await dex.getTokenBalance(tco2Address);
-      expect(ethers.utils.formatEther(afterBalance)).to.eql("0.0");
+      const contractBalanceAfter = await dex.getTokenBalance(tco2Address);
+      expect(ethers.utils.formatEther(contractBalanceAfter)).to.eql("0.0");
     });
   });
 });
