@@ -25,6 +25,9 @@ describe("DEX", function () {
   let dex: DEX;
   let tco: ToucanCarbonOffsets;
   let owner: SignerWithAddress;
+  let addr1: SignerWithAddress;
+  let addr2: SignerWithAddress;
+  let addrs: SignerWithAddress[];
 
   beforeEach(async function () {
     /**
@@ -38,8 +41,10 @@ describe("DEX", function () {
       });
     }
 
-    // we get a signer based on my above address
+    // we get a signer based on my above address (I have TCO2, BCT & MATIC on it at the blockNumber I chose)
     owner = await ethers.getSigner(myAddress);
+    // and we get a bunch of other random signers
+    [addr1, addr2, ...addrs] = await ethers.getSigners();
 
     // we deploy a DEX contract and get a portal to it
     const dexFactory = (await ethers.getContractFactory(
