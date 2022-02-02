@@ -51,6 +51,9 @@ contract DEX {
    * in the long run, this will modified to adapt to the structure mentioned above
    */
   function deposit(address _erc20Address, uint256 _amount) public {
+    // require that this is called by the owner
+    require(owner == msg.sender, "You can't call unless you are the contract owner.");
+
     // check token eligibility
     bool eligibility = checkEligible(_erc20Address);
     require(eligibility, "Token rejected");
@@ -67,15 +70,18 @@ contract DEX {
 
   /* @notice retires that amount from its balance
    * @param _amount to be retired
-   * TODO: question. Should users be able to call this if they are not the owner of the contract?
    */
   function retireTCO2(uint256 _amount) external {
-//    require(msg.sender == owner, "Only use this if you are the contract owner.");
+    // require that this is called by the owner
+    require(owner == msg.sender, "You can't call unless you are the contract owner.");
 
+    // require that the contract owns an amount at least equal to the amount we are trying to retire
     require(_amount <= tokenBalances[tco2Address], "Can't retire more than we hold.");
 
+    // calculate footprint
     footprint = _calculateFootprint(_amount);
 
+    // use the TCO contract to retire TCO2
     ToucanCarbonOffsets(tco2Address).retire(footprint);
 
     // reduce amount of TCO2 in the balance sheet of this contract

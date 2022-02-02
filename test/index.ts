@@ -87,6 +87,8 @@ describe("DEX", function () {
       await retireTxn.wait();
       expect(retireTxn.confirmations).to.be.above(0);
 
+      // TODO check from TCO2 contract too
+
       /**
        * we check the balance and it should be now equal to 0
        */
