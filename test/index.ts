@@ -5,6 +5,7 @@ import { ethers, network } from "hardhat";
 import { DEX, DEX__factory, ToucanCarbonOffsets } from "../typechain";
 import * as tcoAbi from "../artifacts/contracts/CO2KEN_contracts/ToucanCarbonOffsets.sol/ToucanCarbonOffsets.json";
 import deposit from "../utils/deposit";
+import retire from "../utils/retire";
 import { BigNumber } from "ethers";
 
 // this is the TCO2 address from the test.toucan.earth/contracts list for Mumbai network
@@ -100,19 +101,16 @@ describe("DEX", function () {
        * we are expecting it to be equal to the amountToRetire as we redeploy a new DEX contract before each test.
        */
       await deposit(tco, dex, tco2Address, amountToRetire);
-      const initialBalance = await dex.getTokenBalance(tco2Address);
-      expect(ethers.utils.formatEther(initialBalance)).to.eql(amountToRetire);
+      const initialContractBalance = await dex.getTokenBalance(tco2Address);
+      expect(ethers.utils.formatEther(initialContractBalance)).to.eql(
+        amountToRetire
+      );
 
       /**
-       * we attempt to retire 1 TCO2 from the DEX contract and check for txn confirmations
+       * we attempt to retire TCO2 from the DEX contract and check for txn confirmations.
+       * I separated this into another function for readability
        */
-      const retireTxn = await dex.retireTCO2(
-        ethers.utils.parseEther(amountToRetire),
-        {
-          gasLimit: 1200000,
-        }
-      );
-      await retireTxn.wait();
+      const retireTxn = await retire(tco, dex, tco2Address, amountToRetire);
       expect(retireTxn.confirmations).to.be.above(0);
 
       /**
