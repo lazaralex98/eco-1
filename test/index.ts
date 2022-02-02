@@ -88,7 +88,7 @@ describe("DEX", function () {
   });
 
   describe("Retire TCO2", function () {
-    it("Should retire 1 TCO2 from contract balance", async function () {
+    it("Should retire 1 TCO2", async function () {
       const amountToRetire = "1.0";
 
       /**
