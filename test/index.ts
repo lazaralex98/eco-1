@@ -14,6 +14,7 @@ import deposit from "../utils/deposit";
  * I got it from my test project (Yingpeng HFC23 Decompostion Project).
  */
 const tco2Address: string = "0xa5831eb637dff307395b5183c86B04c69C518681";
+// and this is the address that I wish to deploy from
 const myAddress: string = "0x721F6f7A29b99CbdE1F18C4AA7D7AEb31eb2923B";
 
 describe("DEX", function () {
