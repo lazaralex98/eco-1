@@ -23,7 +23,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 // Go to https://hardhat.org/config/ to learn more
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "matic",
+  defaultNetwork: "hardhat",
   solidity: {
     version: "0.8.4",
     settings: {
@@ -34,13 +34,22 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    matic: {
+    mumbai: {
       url: process.env.MUMBAI_URL || "",
       accounts:
         process.env.MUMBAI_PRIVATE_KEY !== undefined
           ? [process.env.MUMBAI_PRIVATE_KEY]
           : [],
     },
+    hardhat: {
+      forking: {
+        url: process.env.MUMBAI_URL || "",
+        blockNumber: 24497424,
+      },
+    },
+  },
+  mocha: {
+    timeout: 400000,
   },
 };
 

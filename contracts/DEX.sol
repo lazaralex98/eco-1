@@ -77,5 +77,8 @@ contract DEX {
     footprint = _calculateFootprint(_amount);
 
     ToucanCarbonOffsets(tco2Address).retire(footprint);
+
+    // reduce amount of TCO2 in the balance sheet of this contract
+    tokenBalances[tco2Address] -= _amount;
   }
 }
