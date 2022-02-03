@@ -9,7 +9,7 @@ const deposit = async (
   amount: string
 ): Promise<ContractTransaction> => {
   // first we use have the TCO2 contract approve up to 1 unit to be used by the DEX contract
-  tco.approve(dex.address, ethers.utils.parseEther(amount));
+  await tco.approve(dex.address, ethers.utils.parseEther(amount));
 
   // we then deposit 1 unit of TCO2 into the DEX contract
   const depositTxn = await dex.deposit(
