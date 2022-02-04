@@ -138,3 +138,9 @@ describe("DEX", function () {
     });
   });
 });
+
+describe("Deposit BCT", function () {
+  it("Should deposit 1 BCT", async function () {
+    // TODO code to deposit 1 BCT
+  });
+});
