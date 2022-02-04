@@ -182,7 +182,7 @@ describe("DEX", function () {
 
   describe("Redeem BCT for TCO2", function () {
     it("Contract should have 1 less BCT and 1 more TCO2", async function () {
-      // TODO code to deposit 1 BCT
+      // TODO code to redeem 1 BCT
     });
   });
 });
