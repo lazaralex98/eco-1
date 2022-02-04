@@ -18,6 +18,7 @@ contract DEX {
 
   uint256 public footprint;
   address public tco2Address;
+  address public bctAddress = 0xf2438A14f668b1bbA53408346288f3d7C71c10a1;
   address public owner;
   mapping(address => uint256) private tokenBalances;
   event Deposited(address erc20Addr, uint256 amount);
