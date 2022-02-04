@@ -22,11 +22,13 @@ contract DEX {
   mapping(address => uint256) private tokenBalances;
   event Deposited(address erc20Addr, uint256 amount);
 
+  // you are supposed to set the address of the TCO2 token you want to use upon deployment of this contract
   constructor (address _tco2Address)  {
     owner = msg.sender;
     tco2Address = _tco2Address;
   }
 
+  // a simple function that retrieves the balance of the specified token
   function getTokenBalance(address _erc20Address) public view returns (uint256) {
     return tokenBalances[_erc20Address];
   }
@@ -41,6 +43,7 @@ contract DEX {
    * this can be changed in the future to contain other tokens
    */
   function checkEligible(address _erc20Address) public view returns (bool) {
+    // TODO make BCT eligible
     if (_erc20Address == tco2Address) return true;
     return false;
   }
