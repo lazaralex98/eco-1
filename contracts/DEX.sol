@@ -44,8 +44,8 @@ contract DEX {
    * this can be changed in the future to contain other tokens
    */
   function checkEligible(address _erc20Address) public view returns (bool) {
-    // TODO make BCT eligible
     if (_erc20Address == tco2Address) return true;
+    if (_erc20Address == bctAddress) return true;
     return false;
   }
 
@@ -62,7 +62,7 @@ contract DEX {
     bool eligibility = checkEligible(_erc20Address);
     require(eligibility, "Token rejected");
 
-    // use TCO contract to do a safe transfer from the user to this contract
+    // use token's contract to do a safe transfer from the user to this contract
     IERC20(_erc20Address).safeTransferFrom(msg.sender, address(this), _amount);
 
     // add amount of said token to balance sheet of this contract
