@@ -91,4 +91,22 @@ contract DEX {
     // reduce amount of TCO2 in the balance sheet of this contract
     tokenBalances[tco2Address] -= _amount;
   }
+
+  // redeems some BCT from contract balance for a chosen TCO2 token
+  // @param _desiredTCO2 the address of the TCO2 you want to receive
+  // @param _amount the amount of BCT you want to redeem for TCO2
+  function redeemBCT(address _desiredTCO2, uint256 _amount) external {
+    // require that this is called by the owner
+    require(owner == msg.sender, "You can't call unless you are the contract owner.");
+
+    // require that the contract owns an amount at least equal to the amount we are trying to retire
+    require(_amount <= tokenBalances[bctAddress], "Can't retire more than we hold.");
+
+    // redeems an amount of BCT (from contract's balance) into the desired TCO2 token
+    BaseCarbonTonne(bctAddress).redeemSingle(this, _desiredTCO2, _amount);
+
+    // TODO not sure if this is needed
+    // reduce amount of BCT in the balance sheet of this contract
+    tokenBalances[bctAddress] -= _amount;
+  }
 }

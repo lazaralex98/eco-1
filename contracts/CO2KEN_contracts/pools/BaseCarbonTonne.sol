@@ -353,16 +353,21 @@ contract BaseCarbonTonne is
     virtual
     whenNotPaused
   {
+    // you need to provide equal arrays of TCO2 addresses and amounts to redeem
     uint256 addrLen = erc20s.length;
     uint256 amountsLen = amounts.length;
     require(addrLen == amountsLen, "Error: Length of arrays not matching");
 
+    // we loop over the provided arrays and, for each index, we redeem BCT
     for (uint256 i = 0; i < addrLen; i++) {
       redeemSingle(msg.sender, erc20s[i], amounts[i]);
     }
   }
 
   // Redeems a single underlying token
+  // @param account address of user looking to redeem BCT for TCO2
+  // @param erc20 address of TCO2 user wants to redeem for
+  // @param amount number of BCT user wants to redeem
   function redeemSingle(
     address account,
     address erc20,
@@ -373,9 +378,14 @@ contract BaseCarbonTonne is
       tokenBalances[erc20] >= amount,
       "Cannot redeem more than is stored in contract"
     );
+
+    // contract burns some BCT from user's account
     _burn(account, amount);
+
+    // transfer TCO2 of choice from contract to user
     tokenBalances[erc20] -= amount;
     IERC20(erc20).safeTransfer(account, amount);
+
     emit Redeemed(account, erc20, amount);
   }
 

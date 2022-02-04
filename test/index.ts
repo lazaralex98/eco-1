@@ -147,7 +147,6 @@ describe("DEX", function () {
 
   describe("Deposit BCT", function () {
     it("Should deposit 1 BCT", async function () {
-      // TODO code to deposit 1 BCT
       const amountToDeposit = "1.0";
 
       /**
@@ -178,6 +177,12 @@ describe("DEX", function () {
        */
       const dexBctBalance = await dex.getTokenBalance(bctAddress);
       expect(ethers.utils.formatEther(dexBctBalance)).to.eql("1.0");
+    });
+  });
+
+  describe("Redeem BCT for TCO2", function () {
+    it("Contract should have 1 less BCT and 1 more TCO2", async function () {
+      // TODO code to deposit 1 BCT
     });
   });
 });
