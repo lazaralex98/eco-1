@@ -2,8 +2,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 // eslint-disable-next-line node/no-missing-import,camelcase
-import { DEX, DEX__factory, ToucanCarbonOffsets } from "../typechain";
+import { BaseCarbonTonne, DEX, DEX__factory, ToucanCarbonOffsets } from "../typechain";
 import * as tcoAbi from "../artifacts/contracts/CO2KEN_contracts/ToucanCarbonOffsets.sol/ToucanCarbonOffsets.json";
+import * as bctAbi from "../artifacts/contracts/CO2KEN_contracts/pools/BaseCarbonTonne.sol/BaseCarbonTonne.json";
 import deposit from "../utils/deposit";
 import retire from "../utils/retire";
 import { BigNumber } from "ethers";
@@ -18,12 +19,14 @@ import { BigNumber } from "ethers";
 const tco2Address: string = "0xa5831eb637dff307395b5183c86B04c69C518681";
 // and this is the address that I wish to deploy from
 const myAddress: string = "0x721F6f7A29b99CbdE1F18C4AA7D7AEb31eb2923B";
+const bctAddress: string = "0xf2438A14f668b1bbA53408346288f3d7C71c10a1";
 
 // TODO implement tests with .to.be.revertedWith
 
 describe("DEX", function () {
   let dex: DEX;
   let tco: ToucanCarbonOffsets;
+  let bct: BaseCarbonTonne;
   let owner: SignerWithAddress;
   let addr1: SignerWithAddress;
   let addr2: SignerWithAddress;
@@ -57,6 +60,10 @@ describe("DEX", function () {
     // we instantiate a portal to my TCO2 contract
     // @ts-ignore
     tco = new ethers.Contract(tco2Address, tcoAbi.abi, owner);
+
+    // we instantiate a portal to BCT
+    // @ts-ignore
+    bct = new ethers.Contract(bctAddress, bctAbi.abi, owner);
   });
 
   describe("Deposit", function () {
@@ -137,10 +144,42 @@ describe("DEX", function () {
       expect(ethers.utils.formatEther(contractBalanceAfter)).to.eql("0.0");
     });
   });
-});
 
-describe("Deposit BCT", function () {
-  it("Should deposit 1 BCT", async function () {
-    // TODO code to deposit 1 BCT
+  describe("Deposit BCT", function () {
+    it("Should deposit 1 BCT", async function () {
+      // TODO code to deposit 1 BCT
+      const amountToDeposit = "1.0";
+
+      /**
+       * we check my bcr before depositing some of it
+       */
+      const myBctBalanceBefore = await bct.balanceOf(myAddress);
+
+      /**
+       * we attempt to deposit an amount of TCO2 into the DEX contract.
+       * I have separated in the deposit() function for readability
+       */
+      const depositTxn = await deposit(bct, dex, bctAddress, amountToDeposit);
+      expect(depositTxn.confirmations).to.be.above(0);
+
+      /**
+       * we check the my TCO2 balance after depositing some of it
+       * and we are expecting it to be less by the deposited amount
+       */
+      const myBctBalanceAfter = await bct.balanceOf(myAddress);
+      const expectedBctBalance = myBctBalanceBefore.sub(
+        ethers.utils.parseEther(amountToDeposit)
+      );
+      expect(myBctBalanceAfter).to.eql(expectedBctBalance);
+
+      /**
+       * we check the TCO2 balance of the contract to see if it changed.
+       * Normally it should be equal to 1.0 as we redeploy a new DEX contract before each test.
+       */
+      const dexBctBalance = await dex.getTokenBalance(bctAddress);
+      expect(ethers.utils.formatEther(dexBctBalance)).to.eql("1.0");
+    });
   });
 });
+
+
