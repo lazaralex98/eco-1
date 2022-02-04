@@ -102,8 +102,10 @@ contract DEX {
     // require that the contract owns an amount at least equal to the amount we are trying to retire
     require(_amount <= tokenBalances[bctAddress], "Can't redeem more than we hold.");
 
-    address[] memory tco2Addresses = new address[](_desiredTCO2);
-    uint256[] memory amounts = uint256[](_amount);
+    address[] memory tco2Addresses = new address[](1);
+    uint256[] memory amounts = new uint256[](1);
+    tco2Addresses[0] = _desiredTCO2;
+    amounts[0] = _amount;
 
     // redeems an amount of BCT (from contract's balance) into the desired TCO2 token(s)
     BaseCarbonTonne(bctAddress).redeemMany(tco2Addresses, amounts);
