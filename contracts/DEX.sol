@@ -102,6 +102,7 @@ contract DEX {
     // require that the contract owns an amount at least equal to the amount we are trying to retire
     require(_amount <= tokenBalances[bctAddress], "Can't redeem more than we hold.");
 
+    // prepare/format params for BCT.retireMany() method
     address[] memory tco2Addresses = new address[](1);
     uint256[] memory amounts = new uint256[](1);
     tco2Addresses[0] = _desiredTCO2;
