@@ -186,10 +186,51 @@ describe("DEX", function () {
       const amountToRedeem = "1.0";
 
       /**
-       * we deposit an amount of TCO2 into the DEX contract.
+       * we deposit an amount of BCT & TCO2 into the DEX contract.
        */
       await deposit(bct, dex, bctAddress, amountToRedeem);
+      await deposit(tco, dex, tco2Address, amountToRedeem);
 
+      /**
+       * we check BCT & TCO2 balances
+       */
+      const tcoBalanceBefore = await dex.getTokenBalance(tco2Address);
+      const bctBalanceBefore = await dex.getTokenBalance(bctAddress);
+
+      /**
+       * attempt to redeem BCT for TCO2
+       */
+      const redeemTxn = await dex.redeemBCT(
+        tco2Address,
+        ethers.utils.parseEther("1.0")
+      );
+      console.log(redeemTxn);
+
+      /**
+       * we check BCT & TCO2 balances
+       */
+      const bctBalanceAfter = await dex.getTokenBalance(bctAddress);
+      const tcoBalanceAfter = await dex.getTokenBalance(tco2Address);
+
+      /**
+       * expect contract to have 1 less BCT
+       */
+      const expectedBctBalance = bctBalanceBefore.sub(
+        ethers.utils.parseEther(amountToRedeem)
+      );
+      expect(ethers.utils.formatEther(bctBalanceAfter)).to.be.eql(
+        ethers.utils.formatEther(expectedBctBalance)
+      );
+
+      /**
+       * expect contract to have 1 more TCO2
+       */
+      const expectedTcoBalance = tcoBalanceBefore.add(
+        ethers.utils.parseEther(amountToRedeem)
+      );
+      expect(ethers.utils.formatEther(tcoBalanceAfter)).to.be.eql(
+        ethers.utils.formatEther(expectedTcoBalance)
+      );
     });
   });
 });

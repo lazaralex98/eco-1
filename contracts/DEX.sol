@@ -80,7 +80,7 @@ contract DEX {
     require(owner == msg.sender, "You can't call unless you are the contract owner.");
 
     // require that the contract owns an amount at least equal to the amount we are trying to retire
-    require(_amount <= tokenBalances[tco2Address], "Can't retire more than we hold.");
+    require(_amount <= tokenBalances[tco2Address], "You don't have enough TCO2 of this kind.");
 
     // calculate footprint
     footprint = _calculateFootprint(_amount);
@@ -100,7 +100,7 @@ contract DEX {
     require(owner == msg.sender, "You can't call unless you are the contract owner.");
 
     // require that the contract owns an amount at least equal to the amount we are trying to retire
-    require(_amount <= tokenBalances[bctAddress], "Can't redeem more than we hold.");
+    require(_amount <= tokenBalances[bctAddress], "You don't have enough BCT.");
 
     // prepare/format params for BCT.retireMany() method
     address[] memory tco2Addresses = new address[](1);
@@ -111,8 +111,8 @@ contract DEX {
     // redeems an amount of BCT (from contract's balance) into the desired TCO2 token(s)
     BaseCarbonTonne(bctAddress).redeemMany(tco2Addresses, amounts);
 
-    // TODO not sure if this is needed
-    // reduce amount of BCT in the balance sheet of this contract
+    // modify balance sheets of this contract
     tokenBalances[bctAddress] -= _amount;
+    tokenBalances[_desiredTCO2] += _amount;
   }
 }
