@@ -201,7 +201,7 @@ describe("DEX", function () {
         tco2Address,
         ethers.utils.parseEther("1.0")
       );
-      console.log("!redeem hash: ", redeemTxn.hash);
+      console.log("redeem hash: ", redeemTxn.hash);
 
       /**
        * we check BCT & TCO2 balances
