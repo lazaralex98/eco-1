@@ -382,7 +382,7 @@ contract BaseCarbonTonne is
     // contract burns some BCT from user's account
     _burn(account, amount);
 
-    // transfer TCO2 of choice from contract to user
+    // transfer TCO2 of choice from BCT contract to user
     tokenBalances[erc20] -= amount;
     IERC20(erc20).safeTransfer(account, amount);
 

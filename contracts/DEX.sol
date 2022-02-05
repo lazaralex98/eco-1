@@ -102,13 +102,19 @@ contract DEX {
     // require that the contract owns an amount at least equal to the amount we are trying to retire
     require(_amount <= tokenBalances[bctAddress], "You don't have enough BCT.");
 
+    // check if BCT contract has our desired TCO2
+    uint256 bctBalanceOfDesiredTCO2 = BaseCarbonTonne(bctAddress).tokenBalances(_desiredTCO2);
+    require(bctBalanceOfDesiredTCO2 >= _amount, "BCT contract doesn't have enough of this TCO2");
+
     // prepare/format params for BCT.retireMany() method
     address[] memory tco2Addresses = new address[](1);
     uint256[] memory amounts = new uint256[](1);
     tco2Addresses[0] = _desiredTCO2;
     amounts[0] = _amount;
 
+
     // redeems an amount of BCT (from contract's balance) into the desired TCO2 token(s)
+    // roughly it means this contract will send the BCT contract some BCT and will receive some TCO2
     BaseCarbonTonne(bctAddress).redeemMany(tco2Addresses, amounts);
 
     // modify balance sheets of this contract

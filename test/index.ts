@@ -79,8 +79,7 @@ describe("DEX", function () {
        * we attempt to deposit an amount of TCO2 into the DEX contract.
        * I have separated in the deposit() function for readability
        */
-      const depositTxn = await deposit(tco, dex, tco2Address, amountToDeposit);
-      expect(depositTxn.confirmations).to.be.above(0);
+      await deposit(tco, dex, tco2Address, amountToDeposit);
 
       /**
        * we check the my TCO2 balance after depositing some of it
@@ -121,11 +120,10 @@ describe("DEX", function () {
       );
 
       /**
-       * we attempt to retire TCO2 from the DEX contract and check for txn confirmations.
+       * we attempt to retire TCO2 from the DEX contract.
        * I separated this into another function for readability
        */
-      const retireTxn = await retire(tco, dex, tco2Address, amountToRetire);
-      expect(retireTxn.confirmations).to.be.above(0);
+      await retire(tco, dex, tco2Address, amountToRetire);
 
       /**
        * we check the total TCO2 supply after depositing and retiring some of it
@@ -158,8 +156,7 @@ describe("DEX", function () {
        * we attempt to deposit an amount of BCT into the DEX contract.
        * I have separated in the deposit() function for readability
        */
-      const depositTxn = await deposit(bct, dex, bctAddress, amountToDeposit);
-      expect(depositTxn.confirmations).to.be.above(0);
+      await deposit(bct, dex, bctAddress, amountToDeposit);
 
       /**
        * we check the my BCT balance after depositing some of it
@@ -182,11 +179,10 @@ describe("DEX", function () {
 
   describe("Redeem BCT for TCO2", function () {
     it("Contract should have 1 less BCT and 1 more TCO2", async function () {
-      // TODO code to redeem 1 BCT
       const amountToRedeem = "1.0";
 
       /**
-       * we deposit an amount of BCT & TCO2 into the DEX contract.
+       * we deposit an amount of BCT & TCO2 into the DEX contract to make sure it has something in it to work with.
        */
       await deposit(bct, dex, bctAddress, amountToRedeem);
       await deposit(tco, dex, tco2Address, amountToRedeem);
@@ -204,7 +200,7 @@ describe("DEX", function () {
         tco2Address,
         ethers.utils.parseEther("1.0")
       );
-      console.log(redeemTxn);
+      console.log("!redeem hash: ", redeemTxn.hash);
 
       /**
        * we check BCT & TCO2 balances
