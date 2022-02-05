@@ -17,6 +17,7 @@ contract DEX {
   using SafeERC20 for IERC20;
   // TODO Q: should it offset it's own footprint or some other contract's footprint?
   // TODO Q: is this supposed to be usable by anyone, or just by who deployed it?
+  // TODO Q: should it be able to retire multiple types of TCO2?
 
   uint256 public footprint;
   address public tco2Address;
@@ -77,7 +78,7 @@ contract DEX {
   /* @notice retires that amount from its balance
    * @param _amount to be retired
    */
-  function retireTCO2(uint256 _amount) external {
+  function retireTCO2(uint256 _amount) public {
     // require that this is called by the owner
     require(owner == msg.sender, "You can't call unless you are the contract owner.");
 
@@ -97,7 +98,7 @@ contract DEX {
   // redeems some BCT from contract balance for a chosen TCO2 token
   // @param _desiredTCO2 the address of the TCO2 you want to receive
   // @param _amount the amount of BCT you want to redeem for TCO2
-  function redeemBCT(address _desiredTCO2, uint256 _amount) external {
+  function redeemBCT(address _desiredTCO2, uint256 _amount) public {
     // require that this is called by the owner
     require(owner == msg.sender, "You can't call unless you are the contract owner.");
 
@@ -113,7 +114,6 @@ contract DEX {
     uint256[] memory amounts = new uint256[](1);
     tco2Addresses[0] = _desiredTCO2;
     amounts[0] = _amount;
-
 
     // redeems an amount of BCT (from contract's balance) into the desired TCO2 token(s)
     // roughly it means this contract will send the BCT contract some BCT and will receive some TCO2

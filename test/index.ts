@@ -185,10 +185,9 @@ describe("DEX", function () {
       const amountToRedeem = "1.0";
 
       /**
-       * we deposit an amount of BCT & TCO2 into the DEX contract to make sure it has something in it to work with.
+       * we deposit an amount of BCT into the DEX contract to make sure it has something in it to work with.
        */
-      await deposit(bct, dex, bctAddress, amountToRedeem);
-      await deposit(tco, dex, tco2Address, amountToRedeem);
+      await deposit(bct, dex, bctAddress, "10.0");
 
       /**
        * we check BCT & TCO2 balances
