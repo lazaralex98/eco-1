@@ -15,6 +15,8 @@ import "./CO2KEN_contracts/pools/BaseCarbonTonne.sol";
  */
 contract DEX {
   using SafeERC20 for IERC20;
+  // TODO Q: should it offset it's own footprint or some other contract's footprint?
+  // TODO Q: is this supposed to be usable by anyone, or just by who deployed it?
 
   uint256 public footprint;
   address public tco2Address;

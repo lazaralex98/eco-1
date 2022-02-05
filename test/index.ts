@@ -179,6 +179,8 @@ describe("DEX", function () {
 
   describe("Redeem BCT for TCO2", function () {
     // TODO why does it work on my fork but fail on Mumbai?
+    // more dets: the redeemBCT() transaction actually succeeds, but the change is not reflected
+    // in the BCT balance of the DEX contract
     it("Contract should have 1 less BCT and 1 more TCO2", async function () {
       const amountToRedeem = "1.0";
 
