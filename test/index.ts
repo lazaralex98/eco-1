@@ -150,19 +150,19 @@ describe("DEX", function () {
       const amountToDeposit = "1.0";
 
       /**
-       * we check my bcr before depositing some of it
+       * we check my bct balance before depositing some of it
        */
       const myBctBalanceBefore = await bct.balanceOf(myAddress);
 
       /**
-       * we attempt to deposit an amount of TCO2 into the DEX contract.
+       * we attempt to deposit an amount of BCT into the DEX contract.
        * I have separated in the deposit() function for readability
        */
       const depositTxn = await deposit(bct, dex, bctAddress, amountToDeposit);
       expect(depositTxn.confirmations).to.be.above(0);
 
       /**
-       * we check the my TCO2 balance after depositing some of it
+       * we check the my BCT balance after depositing some of it
        * and we are expecting it to be less by the deposited amount
        */
       const myBctBalanceAfter = await bct.balanceOf(myAddress);
@@ -172,7 +172,7 @@ describe("DEX", function () {
       expect(myBctBalanceAfter).to.eql(expectedBctBalance);
 
       /**
-       * we check the TCO2 balance of the contract to see if it changed.
+       * we check the BCT balance of the contract to see if it changed.
        * Normally it should be equal to 1.0 as we redeploy a new DEX contract before each test.
        */
       const dexBctBalance = await dex.getTokenBalance(bctAddress);
@@ -183,8 +183,13 @@ describe("DEX", function () {
   describe("Redeem BCT for TCO2", function () {
     it("Contract should have 1 less BCT and 1 more TCO2", async function () {
       // TODO code to redeem 1 BCT
+      const amountToRedeem = "1.0";
+
+      /**
+       * we deposit an amount of TCO2 into the DEX contract.
+       */
+      await deposit(bct, dex, bctAddress, amountToRedeem);
+
     });
   });
 });
-
-
