@@ -178,6 +178,7 @@ describe("DEX", function () {
   });
 
   describe("Redeem BCT for TCO2", function () {
+    // TODO why does it work on my fork but fail on Mumbai?
     it("Contract should have 1 less BCT and 1 more TCO2", async function () {
       const amountToRedeem = "1.0";
 
