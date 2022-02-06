@@ -8,16 +8,28 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./CO2KEN_contracts/ToucanCarbonOffsets.sol";
 import "./CO2KEN_contracts/pools/BaseCarbonTonne.sol";
 
-/* TODO (long term structure)
- * receive WETH, MATIC, USDC or BCT
- *  if WETH, MATIC or USDC -> buy BCT from Sushiswap
- *  if BCT -> redeem BCT for TCO2 -> retire TCO2
- */
 contract DEX {
   using SafeERC20 for IERC20;
-  // TODO Q: should it offset it's own footprint or some other contract's footprint?
-  // TODO Q: is this supposed to be usable by anyone (like a pool), or just by who deployed it?
+  // ======================================================================================================
+  // ------------------------------------------    THE STORY   -------------------------------------------
+  // the main/first functionality of this contract is to redeem BCT
+  // then we present a demonstration of how people could
+  //  1. calculate the emissions / footprint this activity is using when receiving and redeeming BCT
+  //  2. offset its activities (by using the retireTCO2 function)
+  //
+  // How the calculation of the footprint is done, is still up to discussion. One thing I have found
+  // in my research with Andi is that roughly speaking one transaction on Polygon is equal to
+  // 0.0003 kg of CO2 (which means 0,0000003 TCO2)
+  // ======================================================================================================
+
+  // TODO figure out footprint calculation
+
+  // TODO create a Factory contract to make it easy for people to deploy and user their own version of this
+
+  // TODO if possible (time-wise) eventually make a function to swap WETH, MATIC or USDC for BCT with Sushiswap
+
   // TODO Q: should it be able to retire multiple types of TCO2? or just the one it was deployed with?
+  // yes, you should be able to send any TCO2 to this one contract (WAIT FOR JAMES)
 
   uint256 public footprint;
   address public tco2Address;
@@ -37,11 +49,6 @@ contract DEX {
     return tokenBalances[_erc20Address];
   }
 
-  // TODO: this is hardcoded for now, but it should do some carbon emission math to return the footprint
-  function _calculateFootprint(uint256 _amount) private pure returns (uint256) {
-    return _amount;
-  }
-
   /* @notice Internal function that checks if token to be deposited is eligible for this pool
    * @param _erc20Address ERC20 contract address to be checked
    * this can be changed in the future to contain other tokens
@@ -52,7 +59,7 @@ contract DEX {
     return false;
   }
 
-  /* @notice function to deposit tokens from user to this contract
+  /* @description function to deposit tokens from user to this contract
    * @param _erc20Address ERC20 contract address to be deposited
    * @param _amount amount to be deposited
    * in the long run, this will modified to adapt to the structure mentioned above
@@ -71,31 +78,10 @@ contract DEX {
     // add amount of said token to balance sheet of this contract
     tokenBalances[_erc20Address] += _amount;
 
-    // emit an event for good measure
     emit Deposited(_erc20Address, _amount);
   }
 
-  /* @notice retires that amount from its balance
-   * @param _amount to be retired
-   */
-  function retireTCO2(uint256 _amount) public {
-    // require that this is called by the owner
-    require(owner == msg.sender, "You can't call unless you are the contract owner.");
-
-    // require that the contract owns an amount at least equal to the amount we are trying to retire
-    require(_amount <= tokenBalances[tco2Address], "You don't have enough TCO2 of this kind.");
-
-    // calculate footprint
-    footprint = _calculateFootprint(_amount);
-
-    // use the TCO contract to retire TCO2
-    ToucanCarbonOffsets(tco2Address).retire(footprint);
-
-    // reduce amount of TCO2 in the balance sheet of this contract
-    tokenBalances[tco2Address] -= _amount;
-  }
-
-  // redeems some BCT from contract balance for a chosen TCO2 token
+  // @description redeems some BCT from contract balance for a chosen TCO2 token
   // @param _desiredTCO2 the address of the TCO2 you want to receive
   // @param _amount the amount of BCT you want to redeem for TCO2
   function redeemBCT(address _desiredTCO2, uint256 _amount) public {
@@ -122,5 +108,31 @@ contract DEX {
     // modify balance sheets of this contract
     tokenBalances[bctAddress] -= _amount;
     tokenBalances[_desiredTCO2] += _amount;
+  }
+
+  // TODO: this is hardcoded for now, but it should do some carbon emission math to set & return the footprint
+  function _calculateFootprint(uint256 _amount) private pure returns (uint256) {
+    footprint = _amount;
+    return _amount;
+  }
+
+  /* @description this method will be used to retire TCO2 so that you offset the carbon used by this contract
+   * @param _amount to be retired
+   */
+  function retireTCO2(uint256 _amount) public {
+    // require that this is called by the owner
+    require(owner == msg.sender, "You can't call unless you are the contract owner.");
+
+    // require that the contract owns an amount at least equal to the amount we are trying to retire
+    require(_amount <= tokenBalances[tco2Address], "You don't have enough TCO2 of this kind.");
+
+    // calculate footprint
+    footprint = _calculateFootprint(_amount);
+
+    // use the TCO contract to retire TCO2
+    ToucanCarbonOffsets(tco2Address).retire(footprint);
+
+    // reduce amount of TCO2 in the balance sheet of this contract
+    tokenBalances[tco2Address] -= _amount;
   }
 }
