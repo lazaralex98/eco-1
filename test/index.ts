@@ -223,6 +223,9 @@ describe("DEX", function () {
       // I guess that's why my method doesn't get reverted and shows a success?
       // Because my method worked, but the redeem method it calls didn't
       // is there a way for my method to 'await' the result of the method it calls?
+      // but why does redeemMany() fail?
+      // and why does my method show me a success when it truly never got to the end of all its actions
+      // (updating it's balance sheet)
       expect(ethers.utils.formatEther(bctBalanceAfterByBCT)).to.be.eql(
         ethers.utils.formatEther(bctBalanceAfterByDEX)
       );
