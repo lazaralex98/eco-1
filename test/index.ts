@@ -178,9 +178,6 @@ describe("DEX", function () {
   });
 
   describe("Redeem BCT for TCO2", function () {
-    // TODO why does it work on my fork but fail on Mumbai?
-    // more dets: the redeemBCT() transaction actually succeeds, but the change is not reflected
-    // in the BCT balance of the DEX contract
     it("Contract should have 1 less BCT and 1 more TCO2", async function () {
       const amountToRedeem = "1.0";
 
@@ -219,14 +216,6 @@ describe("DEX", function () {
       /**
        * I want to check the balances against each other
        */
-      // TODO very interestingly, these match so on both of them (in Mumbai) the BCT Balance
-      // actually doesn't get changed, which may mean that, somehow, the BCT.redeemMany() method has failed?
-      // I guess that's why my method doesn't get reverted and shows a success?
-      // Because my method worked, but the redeem method it calls didn't
-      // is there a way for my method to 'await' the result of the method it calls?
-      // but why does redeemMany() fail?
-      // and why does my method show me a success when it truly never got to the end of all its actions
-      // (updating it's balance sheet)
       expect(ethers.utils.formatEther(bctBalanceAfterByBCT)).to.be.eql(
         ethers.utils.formatEther(bctBalanceAfterByDEX)
       );
