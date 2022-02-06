@@ -111,7 +111,7 @@ contract DEX {
   }
 
   // TODO: this is hardcoded for now, but it should do some carbon emission math to set & return the footprint
-  function _calculateFootprint(uint256 _amount) private pure returns (uint256) {
+  function _calculateFootprint(uint256 _amount) private returns (uint256) {
     footprint = _amount;
     return _amount;
   }
