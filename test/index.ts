@@ -21,7 +21,7 @@ const tco2Address: string = "0xa5831eb637dff307395b5183c86B04c69C518681";
 const myAddress: string = "0x721F6f7A29b99CbdE1F18C4AA7D7AEb31eb2923B";
 const bctAddress: string = "0xf2438A14f668b1bbA53408346288f3d7C71c10a1";
 
-// TODO implement tests with .to.be.revertedWith
+// TODO most tests shall be redone for new contract structure
 
 describe("DEX", function () {
   let dex: DEX;
