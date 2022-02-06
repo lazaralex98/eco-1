@@ -202,13 +202,33 @@ describe("DEX", function () {
         tco2Address,
         ethers.utils.parseEther("1.0")
       );
-      console.log("redeem hash: ", redeemTxn.hash);
 
       /**
-       * we check BCT & TCO2 balances
+       * we check BCT & TCO2 balances as per DEX's balance sheet
        */
-      const bctBalanceAfter = await dex.getTokenBalance(bctAddress);
-      const tcoBalanceAfter = await dex.getTokenBalance(tco2Address);
+      const bctBalanceAfterByDEX = await dex.getTokenBalance(bctAddress);
+      const tcoBalanceAfterByDEX = await dex.getTokenBalance(tco2Address);
+
+      /**
+       * we check BCT & TCO2 balances as per DEX's balance sheet
+       */
+      const bctBalanceAfterByBCT = await bct.balanceOf(dex.address);
+      const tcoBalanceAfterByTCO = await tco.balanceOf(dex.address);
+
+      /**
+       * I want to check the balances against each other
+       */
+      // TODO very interestingly, these match so on both of them (in Mumbai) the BCT Balance
+      // actually doesn't get changed, which may mean that, somehow, the BCT.redeemMany() method has failed?
+      // I guess that's why my method doesn't get reverted and shows a success?
+      // Because my method worked, but the redeem method it calls didn't
+      // is there a way for my method to 'await' the result of the method it calls?
+      expect(ethers.utils.formatEther(bctBalanceAfterByBCT)).to.be.eql(
+        ethers.utils.formatEther(bctBalanceAfterByDEX)
+      );
+      expect(ethers.utils.formatEther(tcoBalanceAfterByTCO)).to.be.eql(
+        ethers.utils.formatEther(tcoBalanceAfterByDEX)
+      );
 
       /**
        * expect contract to have 1 less BCT
@@ -216,7 +236,7 @@ describe("DEX", function () {
       const expectedBctBalance = bctBalanceBefore.sub(
         ethers.utils.parseEther(amountToRedeem)
       );
-      expect(ethers.utils.formatEther(bctBalanceAfter)).to.be.eql(
+      expect(ethers.utils.formatEther(bctBalanceAfterByDEX)).to.be.eql(
         ethers.utils.formatEther(expectedBctBalance)
       );
 
@@ -226,7 +246,7 @@ describe("DEX", function () {
       const expectedTcoBalance = tcoBalanceBefore.add(
         ethers.utils.parseEther(amountToRedeem)
       );
-      expect(ethers.utils.formatEther(tcoBalanceAfter)).to.be.eql(
+      expect(ethers.utils.formatEther(tcoBalanceAfterByDEX)).to.be.eql(
         ethers.utils.formatEther(expectedTcoBalance)
       );
     });
