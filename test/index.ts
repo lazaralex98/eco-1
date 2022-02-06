@@ -202,6 +202,7 @@ describe("DEX", function () {
         tco2Address,
         ethers.utils.parseEther("1.0")
       );
+      await redeemTxn.wait();
 
       /**
        * we check BCT & TCO2 balances as per DEX's balance sheet
@@ -255,3 +256,4 @@ describe("DEX", function () {
     });
   });
 });
+//
