@@ -14,7 +14,7 @@ contract DEX {
   // ------------------------------------------    THE STORY   -------------------------------------------
   // the main/first functionality of this contract is to redeem BCT
   // then we present a demonstration of how people could
-  //  1. calculate the emissions / footprint this activity is using when receiving and redeeming BCT
+  //  1. calculate the emissions / footprint of this contract when receiving and redeeming BCT
   //  2. offset its activities (by using the retireTCO2 function)
   //
   // How the calculation of the footprint is done, is still up to discussion. One thing I have found
@@ -24,7 +24,7 @@ contract DEX {
 
   // TODO figure out footprint calculation
 
-  // TODO create a Factory contract to make it easy for people to deploy and user their own version of this
+  // TODO create a Factory contract to make it easy for people to deploy and user their own version of this contract
 
   // TODO if possible (time-wise) eventually make a function to swap WETH, MATIC or USDC for BCT with Sushiswap
 
