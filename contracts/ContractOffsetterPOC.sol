@@ -104,7 +104,7 @@ contract ContractOffsetterPOC {
 
     // reduce amount of TCO2 in the balance sheet of this contract
     // TODO: make this reduce amount for each used TCO2
-    balances[msg.sender][tco2Address] -= _amount;
+    balances[msg.sender][tco2Address] -= footprint;
 
     // reset the footprint
     footprint = 0;
