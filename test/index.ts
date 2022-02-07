@@ -26,7 +26,7 @@ const tco2Address: string = "0xa5831eb637dff307395b5183c86B04c69C518681";
 const myAddress: string = "0x721F6f7A29b99CbdE1F18C4AA7D7AEb31eb2923B";
 const bctAddress: string = "0xf2438A14f668b1bbA53408346288f3d7C71c10a1";
 
-// TODO most tests shall be redone for new contract structure
+// TODO more tests
 
 describe("Contract Offsetter POC", function () {
   let cop: ContractOffsetterPOC;
@@ -120,11 +120,7 @@ describe("Contract Offsetter POC", function () {
 
   describe("selfOffset", function () {
     it("Should retire all TCO2 & footprint should be 0", async function () {
-      expect(
-        ethers.utils.formatEther(await cop.footprints(myAddress))
-      ).to.be.eql("0.0");
-
-      await deposit(bct, cop, bctAddress, "100.0");
+      await deposit(bct, cop, bctAddress, "15.0");
 
       const redeemTxn = await cop.redeemBCT(
         tco2Address,
@@ -144,12 +140,8 @@ describe("Contract Offsetter POC", function () {
       ).to.be.eql("0.0");
     });
 
-    it("Should retire 1 TCO2 & footprint should be less by 1", async function () {
-      expect(
-        ethers.utils.formatEther(await cop.footprints(myAddress))
-      ).to.be.eql("0.0");
-
-      await deposit(bct, cop, bctAddress, "100.0");
+    it("Should retire 0.000001 TCO2 & footprint should be less by 0.000001", async function () {
+      await deposit(bct, cop, bctAddress, "10.0");
 
       const redeemTxn = await cop.redeemBCT(
         tco2Address,
@@ -163,13 +155,13 @@ describe("Contract Offsetter POC", function () {
 
       const offsetTxn = await cop["selfOffset(address,uint256)"](
         tco2Address,
-        ethers.utils.parseEther("0.0000018")
+        ethers.utils.parseEther("0.000001")
       );
       await offsetTxn.wait();
 
       expect(
         ethers.utils.formatEther(await cop.footprints(myAddress))
-      ).to.be.eql("0.0");
+      ).to.be.eql("0.00000152");
     });
 
     it("Should be reverted with 'Can't retire this token.'", async function () {});
