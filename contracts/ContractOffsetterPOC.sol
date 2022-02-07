@@ -10,7 +10,6 @@ import "./CO2KEN_contracts/ToucanCarbonOffsets.sol";
 import "./CO2KEN_contracts/pools/BaseCarbonTonne.sol";
 import "./CO2KEN_contracts/IToucanContractRegistry.sol";
 
-
 contract ContractOffsetterPOC is OwnableUpgradeable {
   using SafeERC20 for IERC20;
   // ======================================================================================================
@@ -41,31 +40,38 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   //
   // ======================================================================================================
 
-
   // user => footprint
   mapping(address => uint256) public footprints;
   address public bctAddress = 0xf2438A14f668b1bbA53408346288f3d7C71c10a1;
   address public contractRegistry = 0x6739D490670B2710dc7E79bB12E455DE33EE1cb6;
   // user => (token => amount)
-  mapping(address => mapping(address => uint)) public balances;
-  event Deposited(address depositorAddress, address erc20Address, uint256 amountDeposited);
+  mapping(address => mapping(address => uint256)) public balances;
+  event Deposited(
+    address depositorAddress,
+    address erc20Address,
+    uint256 amountDeposited
+  );
 
   // @description you can use this to change the TCO2 contracts registry if needed
   // @param _address the contract registry to use
   function setToucanContractRegistry(address _address)
-  public
-  virtual
-  onlyOwner
+    public
+    virtual
+    onlyOwner
   {
     contractRegistry = _address;
   }
 
   // @description checks if token to be deposited is eligible for this pool
   // @param _erc20Address address to be checked
-  function checkTokenEligibility(address _erc20Address) private view returns (bool) {
+  function checkTokenEligibility(address _erc20Address)
+    private
+    view
+    returns (bool)
+  {
     // check if token is a TCO2
     bool isToucanContract = IToucanContractRegistry(contractRegistry)
-    .checkERC20(_erc20Address);
+      .checkERC20(_erc20Address);
     if (isToucanContract) return true;
 
     // check if token is BCT
@@ -102,7 +108,10 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
     // update footprint to account for this function and its transactions
     _updateFootprint(3);
 
-    require(_amount <= balances[msg.sender][bctAddress], "You don't have enough BCT in this contract.");
+    require(
+      _amount <= balances[msg.sender][bctAddress],
+      "You don't have enough BCT in this contract."
+    );
 
     bool eligibility = checkTokenEligibility(_desiredTCO2);
     require(eligibility, "Can't redeem BCT for this token.");
@@ -123,7 +132,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
 
   // for the moment we are using a hardcoded TCO2 per transaction until we have something better
   function _updateFootprint(uint256 _transactions) private returns (uint256) {
-    footprints[msg.sender] += _transactions * 36 / 100000000 ; // * 0.00000036
+    footprints[msg.sender] += (_transactions * 36) / 100000000; // * 0.00000036
     return footprints[msg.sender];
   }
 

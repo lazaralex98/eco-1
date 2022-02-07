@@ -2,7 +2,13 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 // eslint-disable-next-line node/no-missing-import,camelcase
-import { BaseCarbonTonne, DEX, DEX__factory, ToucanCarbonOffsets } from "../typechain";
+import {
+  BaseCarbonTonne,
+  ContractOffsetterPOC,
+  // eslint-disable-next-line camelcase
+  ContractOffsetterPOC__factory,
+  ToucanCarbonOffsets,
+} from "../typechain";
 import * as tcoAbi from "../artifacts/contracts/CO2KEN_contracts/ToucanCarbonOffsets.sol/ToucanCarbonOffsets.json";
 import * as bctAbi from "../artifacts/contracts/CO2KEN_contracts/pools/BaseCarbonTonne.sol/BaseCarbonTonne.json";
 import deposit from "../utils/deposit";
@@ -23,8 +29,8 @@ const bctAddress: string = "0xf2438A14f668b1bbA53408346288f3d7C71c10a1";
 
 // TODO most tests shall be redone for new contract structure
 
-describe("DEX", function () {
-  let dex: DEX;
+describe("Contract Offsetter POC", function () {
+  let cop: ContractOffsetterPOC;
   let tco: ToucanCarbonOffsets;
   let bct: BaseCarbonTonne;
   let owner: SignerWithAddress;
@@ -50,12 +56,12 @@ describe("DEX", function () {
     [addr1, addr2, ...addrs] = await ethers.getSigners();
 
     // we deploy a DEX contract and get a portal to it
-    const dexFactory = (await ethers.getContractFactory(
-      "DEX",
+    const copFactory = (await ethers.getContractFactory(
+      "ContractOffsetterPOC",
       owner
       // eslint-disable-next-line camelcase
-    )) as DEX__factory;
-    dex = await dexFactory.deploy(tco2Address);
+    )) as ContractOffsetterPOC__factory;
+    cop = await copFactory.deploy();
 
     // we instantiate a portal to my TCO2 contract
     // @ts-ignore
@@ -67,181 +73,41 @@ describe("DEX", function () {
   });
 
   describe("Deposit", function () {
+    /**
+     * We're depositing 1 TCO2 to a newly deployed contract, empty contract
+     */
     it("Should deposit 1 TCO2", async function () {
-      const amountToDeposit = "1.0";
+      await deposit(tco, cop, tco2Address, "1.0");
 
-      /**
-       * we check my TCO2 before depositing some of it
-       */
-      const myTcoBalanceBefore = await tco.balanceOf(myAddress);
-
-      /**
-       * we attempt to deposit an amount of TCO2 into the DEX contract.
-       * I have separated in the deposit() function for readability
-       */
-      await deposit(tco, dex, tco2Address, amountToDeposit);
-
-      /**
-       * we check the my TCO2 balance after depositing some of it
-       * and we are expecting it to be less by the deposited amount
-       */
-      const myTcoBalanceAfter = await tco.balanceOf(myAddress);
-      const expectedTcoBalance = myTcoBalanceBefore.sub(
-        ethers.utils.parseEther(amountToDeposit)
-      );
-      expect(myTcoBalanceAfter).to.eql(expectedTcoBalance);
-
-      /**
-       * we check the TCO2 balance of the contract to see if it changed.
-       * Normally it should be equal to 1.0 as we redeploy a new DEX contract before each test.
-       */
-      const dexTcoBalance = await dex.getTokenBalance(tco2Address);
-      expect(ethers.utils.formatEther(dexTcoBalance)).to.eql("1.0");
+      const balance = await cop.balances(myAddress, tco2Address);
+      expect(ethers.utils.formatEther(balance)).to.eql("1.0");
     });
-  });
 
-  describe("Retire TCO2", function () {
-    it("Should retire 1 TCO2", async function () {
-      const amountToRetire = "1.0";
-
-      /**
-       * we check the total TCO2 supply before depositing and retiring some of it
-       */
-      const tcoSupplyBefore = await tco.totalSupply();
-
-      /**
-       * we deposit an amount of TCO2 to the DEX contract and then get the balance of the DEX contract.
-       * we are expecting it to be equal to the amountToRetire as we redeploy a new DEX contract before each test.
-       */
-      await deposit(tco, dex, tco2Address, amountToRetire);
-      const initialContractBalance = await dex.getTokenBalance(tco2Address);
-      expect(ethers.utils.formatEther(initialContractBalance)).to.eql(
-        amountToRetire
-      );
-
-      /**
-       * we attempt to retire TCO2 from the DEX contract.
-       * I separated this into another function for readability
-       */
-      await retire(tco, dex, tco2Address, amountToRetire);
-
-      /**
-       * we check the total TCO2 supply after depositing and retiring some of it
-       * and we expect it to be less by the amount to be retired
-       */
-      const tcoSupplyAfter = await tco.totalSupply();
-      const expectedTcoSupply = tcoSupplyBefore.sub(
-        ethers.utils.parseEther(amountToRetire)
-      );
-      expect(tcoSupplyAfter).to.eql(expectedTcoSupply);
-
-      /**
-       * we check the DEX contract's TCO2 balance after the operations were done
-       */
-      const contractBalanceAfter = await dex.getTokenBalance(tco2Address);
-      expect(ethers.utils.formatEther(contractBalanceAfter)).to.eql("0.0");
-    });
-  });
-
-  describe("Deposit BCT", function () {
     it("Should deposit 1 BCT", async function () {
-      const amountToDeposit = "1.0";
+      await deposit(bct, cop, bctAddress, "1.0");
 
-      /**
-       * we check my bct balance before depositing some of it
-       */
-      const myBctBalanceBefore = await bct.balanceOf(myAddress);
-
-      /**
-       * we attempt to deposit an amount of BCT into the DEX contract.
-       * I have separated in the deposit() function for readability
-       */
-      await deposit(bct, dex, bctAddress, amountToDeposit);
-
-      /**
-       * we check the my BCT balance after depositing some of it
-       * and we are expecting it to be less by the deposited amount
-       */
-      const myBctBalanceAfter = await bct.balanceOf(myAddress);
-      const expectedBctBalance = myBctBalanceBefore.sub(
-        ethers.utils.parseEther(amountToDeposit)
-      );
-      expect(myBctBalanceAfter).to.eql(expectedBctBalance);
-
-      /**
-       * we check the BCT balance of the contract to see if it changed.
-       * Normally it should be equal to 1.0 as we redeploy a new DEX contract before each test.
-       */
-      const dexBctBalance = await dex.getTokenBalance(bctAddress);
-      expect(ethers.utils.formatEther(dexBctBalance)).to.eql("1.0");
+      const balance = await cop.balances(myAddress, bctAddress);
+      expect(ethers.utils.formatEther(balance)).to.eql("1.0");
     });
   });
 
-  describe("Redeem BCT for TCO2", function () {
-    it("Contract should have 1 less BCT and 1 more TCO2", async function () {
-      const amountToRedeem = "1.0";
+  describe("redeemBCT", function () {
+    it("Should redeem 1 BCT for 1 TCO2", async function () {});
 
-      /**
-       * we deposit an amount of BCT into the DEX contract to make sure it has something in it to work with.
-       */
-      await deposit(bct, dex, bctAddress, "10.0");
+    it("Should be reverted with 'You don't have enough BCT in this contract.'", async function () {});
 
-      /**
-       * we check BCT & TCO2 balances
-       */
-      const tcoBalanceBefore = await dex.getTokenBalance(tco2Address);
-      const bctBalanceBefore = await dex.getTokenBalance(bctAddress);
+    it("Should be reverted with 'Can't redeem BCT for this token.", async function () {});
+  });
 
-      /**
-       * attempt to redeem BCT for TCO2
-       */
-      const redeemTxn = await dex.redeemBCT(
-        tco2Address,
-        ethers.utils.parseEther("1.0")
-      );
-      await redeemTxn.wait();
+  describe("selfOffset", function () {
+    it("Should retire 1 TCO2 & footprint should be less by 1", async function () {});
 
-      /**
-       * we check BCT & TCO2 balances as per DEX's balance sheet
-       */
-      const bctBalanceAfterByDEX = await dex.getTokenBalance(bctAddress);
-      const tcoBalanceAfterByDEX = await dex.getTokenBalance(tco2Address);
+    it("Should retire all TCO2 & footprint should be 0", async function () {});
 
-      /**
-       * we check BCT & TCO2 balances as per DEX's balance sheet
-       */
-      const bctBalanceAfterByBCT = await bct.balanceOf(dex.address);
-      const tcoBalanceAfterByTCO = await tco.balanceOf(dex.address);
+    it("Should be reverted with 'Can't retire this token.'", async function () {});
 
-      /**
-       * I want to check the balances against each other
-       */
-      expect(ethers.utils.formatEther(bctBalanceAfterByBCT)).to.be.eql(
-        ethers.utils.formatEther(bctBalanceAfterByDEX)
-      );
-      expect(ethers.utils.formatEther(tcoBalanceAfterByTCO)).to.be.eql(
-        ethers.utils.formatEther(tcoBalanceAfterByDEX)
-      );
+    it("Should be reverted with 'You don't have enough of this TCO2 (deposited).", async function () {});
 
-      /**
-       * expect contract to have 1 less BCT
-       */
-      const expectedBctBalance = bctBalanceBefore.sub(
-        ethers.utils.parseEther(amountToRedeem)
-      );
-      expect(ethers.utils.formatEther(bctBalanceAfterByDEX)).to.be.eql(
-        ethers.utils.formatEther(expectedBctBalance)
-      );
-
-      /**
-       * expect contract to have 1 more TCO2
-       */
-      const expectedTcoBalance = tcoBalanceBefore.add(
-        ethers.utils.parseEther(amountToRedeem)
-      );
-      expect(ethers.utils.formatEther(tcoBalanceAfterByDEX)).to.be.eql(
-        ethers.utils.formatEther(expectedTcoBalance)
-      );
-    });
+    it("Should be reverted with 'You can't offset more than your footprint.'", async function () {});
   });
 });

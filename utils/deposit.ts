@@ -1,18 +1,18 @@
 import { ethers } from "hardhat";
-import { BaseCarbonTonne, DEX, ToucanCarbonOffsets } from "../typechain";
+import { BaseCarbonTonne, ContractOffsetterPOC, ToucanCarbonOffsets } from "../typechain";
 import { ContractTransaction } from "ethers";
 
 const deposit = async (
   tokenContract: ToucanCarbonOffsets | BaseCarbonTonne,
-  dex: DEX,
+  cop: ContractOffsetterPOC,
   tokenAddress: string,
   amount: string
 ): Promise<ContractTransaction> => {
   // first we use have the TCO2 contract approve up to 1 unit to be used by the DEX contract
-  await tokenContract.approve(dex.address, ethers.utils.parseEther(amount));
+  await tokenContract.approve(cop.address, ethers.utils.parseEther(amount));
 
-  // we then deposit 1 unit of TCO2 into the DEX contract
-  const depositTxn = await dex.deposit(
+  // we then deposit TCO2 into the COP contract
+  const depositTxn = await cop.deposit(
     tokenAddress,
     ethers.utils.parseEther(amount),
     {
