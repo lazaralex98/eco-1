@@ -12,7 +12,6 @@ import {
 import * as tcoAbi from "../artifacts/contracts/CO2KEN_contracts/ToucanCarbonOffsets.sol/ToucanCarbonOffsets.json";
 import * as bctAbi from "../artifacts/contracts/CO2KEN_contracts/pools/BaseCarbonTonne.sol/BaseCarbonTonne.json";
 import deposit from "../utils/deposit";
-import retire from "../utils/retire";
 import { BigNumber } from "ethers";
 
 // this is the TCO2 address from the test.toucan.earth/contracts list for Mumbai network
