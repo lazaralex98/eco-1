@@ -26,6 +26,9 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   //  At any point in time, the user can check the footprint created by his using of this contract.
   //  And he can also offset that footprint (by retiring TCO2).
   //
+  //  When the user offsets, he can choose between offsetting ALL his footprint or an amount of his choice.
+  //  He can't offset more than his footprint.
+  //
   //  If the user already has TCO2 in his wallet, he has the possibility to deposit that to this contract
   //  in order to retire it and offset the footprint.
   //
@@ -33,6 +36,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   //  that adds to the footprint.
   //
   //  And there are some long-term TODOs:
+  //  TODO addContract(), addEvents(); documented here: https://linear.app/toucan/issue/ECO-22/mycontractoffsetter-my-personal-offsetting-contract
   //  TODO a function to swap (W)ETH, (W)MATIC or USDC for BCT with Sushiswap
   //
   // ======================================================================================================
@@ -123,9 +127,8 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
     return footprints[msg.sender];
   }
 
-  // @description retire TCO2 so that you offset the carbon used by this contract
+  // @description retire TCO2 so that you offset ALL the carbon used by this contract
   // @param _tco2Address address of the TCO2 you want to retire
-  // TODO Q: user can only retire ALL his footprint at once, should he be able to retire only some of it?
   function selfOffset(address _tco2Address) public {
     // update footprint to account for this function and its transactions
     _updateFootprint(2);
@@ -133,7 +136,6 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
     bool eligibility = checkTokenEligibility(_tco2Address);
     require(eligibility, "Can't retire this token.");
 
-    // require that the contract owns an amount at least equal to the amount we are trying to retire
     require(
       footprints[msg.sender] <= balances[msg.sender][_tco2Address],
       "You don't have enough of this TCO2 (deposited)."
@@ -142,10 +144,40 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
     // use the TCO contract to retire TCO2
     ToucanCarbonOffsets(_tco2Address).retire(footprints[msg.sender]);
 
-    // reduce amount of TCO2 in the balance sheet of this contract
+    // reduce amount of TCO2 in the balance sheet
     balances[msg.sender][_tco2Address] -= footprints[msg.sender];
 
     // reset the footprint
     footprints[msg.sender] = 0;
+  }
+
+  // @description retire TCO2 so that you offset a certain amount of the carbon used by this contract
+  // @param _tco2Address address of the TCO2 you want to retire
+  // @param _amount how much CO2 you want to offset
+  function selfOffset(address _tco2Address, uint256 _amount) public {
+    // update footprint to account for this function and its transactions
+    _updateFootprint(2);
+
+    bool eligibility = checkTokenEligibility(_tco2Address);
+    require(eligibility, "Can't retire this token.");
+
+    require(
+      _amount <= balances[msg.sender][_tco2Address],
+      "You don't have enough of this TCO2 (deposited)."
+    );
+
+    require(
+      _amount <= footprints[msg.sender],
+      "You can't offset more than your footprint."
+    );
+
+    // use the TCO contract to retire TCO2
+    ToucanCarbonOffsets(_tco2Address).retire(_amount);
+
+    // reduce amount of TCO2 in the balance sheet
+    balances[msg.sender][_tco2Address] -= _amount;
+
+    // reduce the footprint
+    footprints[msg.sender] -= _amount;
   }
 }
