@@ -91,22 +91,81 @@ describe("Contract Offsetter POC", function () {
   });
 
   describe("redeemBCT", function () {
-    it("Should redeem 1 BCT for 1 TCO2", async function () {});
+    it("Should redeem 1 BCT for 1 TCO2", async function () {
+      await deposit(bct, cop, bctAddress, "10.0");
 
-    it("Should be reverted with 'You don't have enough BCT in this contract.'", async function () {});
+      const redeemTxn = await cop.redeemBCT(
+        tco2Address,
+        ethers.utils.parseEther("1.0")
+      );
+      await redeemTxn.wait();
+
+      const bctBalance = await cop.balances(myAddress, bctAddress);
+      expect(ethers.utils.formatEther(bctBalance)).to.eql("9.0");
+
+      const tcoBalance = await cop.balances(myAddress, tco2Address);
+      expect(ethers.utils.formatEther(tcoBalance)).to.eql("1.0");
+    });
+
+    it("Should be reverted with 'You don't have enough BCT in this contract.'", async function () {
+      await deposit(bct, cop, bctAddress, "0.5");
+
+      await expect(
+        cop.redeemBCT(tco2Address, ethers.utils.parseEther("10.0"))
+      ).to.be.revertedWith("You don't have enough BCT in this contract.");
+    });
 
     it("Should be reverted with 'Can't redeem BCT for this token.", async function () {});
   });
 
   describe("selfOffset", function () {
-    it("Should retire 1 TCO2 & footprint should be less by 1", async function () {});
+    it("Should retire all TCO2 & footprint should be 0", async function () {
+      expect(
+        ethers.utils.formatEther(await cop.footprints(myAddress))
+      ).to.be.eql("0.0");
 
-    it("Should retire all TCO2 & footprint should be 0", async function () {});
+      await deposit(bct, cop, bctAddress, "100.0");
+
+      const redeemTxn = await cop.redeemBCT(
+        tco2Address,
+        ethers.utils.parseEther("10.0")
+      );
+      await redeemTxn.wait();
+
+      // TODO this shouldn't be 0.0; _updateFootpring() might not work
+      expect(
+        ethers.utils.formatEther(await cop.footprints(myAddress))
+      ).to.be.eql("213.0");
+
+      const offsetTxn = await cop["selfOffset(address)"](tco2Address);
+      await offsetTxn.wait();
+
+      expect(
+        ethers.utils.formatEther(await cop.footprints(myAddress))
+      ).to.be.eql("0.0");
+    });
+
+    it("Should retire 1 TCO2 & footprint should be less by 1", async function () {});
 
     it("Should be reverted with 'Can't retire this token.'", async function () {});
 
-    it("Should be reverted with 'You don't have enough of this TCO2 (deposited).", async function () {});
+    it("Should be reverted with 'You don't have enough of this TCO2 (in the contract).'", async function () {});
 
-    it("Should be reverted with 'You can't offset more than your footprint.'", async function () {});
+    it("Should be reverted with 'You can't offset more than your footprint.'", async function () {
+      await deposit(bct, cop, bctAddress, "15.0");
+
+      const redeemTxn = await cop.redeemBCT(
+        tco2Address,
+        ethers.utils.parseEther("10.0")
+      );
+      await redeemTxn.wait();
+
+      await expect(
+        cop["selfOffset(address,uint256)"](
+          tco2Address,
+          ethers.utils.parseEther("2.0")
+        )
+      ).to.be.revertedWith("You can't offset more than your footprint.");
+    });
   });
 });

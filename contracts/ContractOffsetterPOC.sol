@@ -62,6 +62,11 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
     contractRegistry = _address;
   }
 
+  // for the moment we are using a hardcoded TCO2 per transaction until we have something better
+  function _updateFootprint(uint256 _transactions) private {
+    footprints[msg.sender] += (_transactions * 36) / 100000000; // * 0.00000036
+  }
+
   // @description checks if token to be deposited is eligible for this pool
   // @param _erc20Address address to be checked
   function checkTokenEligibility(address _erc20Address)
@@ -130,12 +135,6 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
     balances[msg.sender][_desiredTCO2] += _amount;
   }
 
-  // for the moment we are using a hardcoded TCO2 per transaction until we have something better
-  function _updateFootprint(uint256 _transactions) private returns (uint256) {
-    footprints[msg.sender] += (_transactions * 36) / 100000000; // * 0.00000036
-    return footprints[msg.sender];
-  }
-
   // @description retire TCO2 so that you offset ALL the carbon used by this contract
   // @param _tco2Address address of the TCO2 you want to retire
   function selfOffset(address _tco2Address) public {
@@ -147,7 +146,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
 
     require(
       footprints[msg.sender] <= balances[msg.sender][_tco2Address],
-      "You don't have enough of this TCO2 (deposited)."
+      "You don't have enough of this TCO2 (in the contract)."
     );
 
     // use the TCO contract to retire TCO2
@@ -172,7 +171,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
 
     require(
       _amount <= balances[msg.sender][_tco2Address],
-      "You don't have enough of this TCO2 (deposited)."
+      "You don't have enough of this TCO2 (in the contract)."
     );
 
     require(
