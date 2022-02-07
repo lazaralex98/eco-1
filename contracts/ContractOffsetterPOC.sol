@@ -19,7 +19,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   //  As this contract is used, the contract calculates the footprint of each user
   //  (meaning the CO2 that was emitted when using this contract).
   //
-  //  For the moment, we are using a hardcoded 0,0000003 TCO2 per transaction to calculate
+  //  For the moment, we are using a hardcoded 0,00000036 TCO2 per transaction to calculate
   //  the footprint. The goal is to eventually get a real calculation in place.
   //
   //  At any point in time, the user can check the footprint created by his using of this contract.
@@ -63,8 +63,8 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   }
 
   // for the moment we are using a hardcoded TCO2 per transaction until we have something better
-  function _updateFootprint(uint256 _transactions) private {
-    footprints[msg.sender] += (_transactions * 36) / 100000000; // * 0.00000036
+  function addFootprint(uint256 _transactions) private {
+    footprints[msg.sender] += 360000000000 * _transactions; // 0,00000036 TCO2 per transaction
   }
 
   // @description checks if token to be deposited is eligible for this pool
@@ -91,7 +91,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   // @param _amount amount to be deposited
   function deposit(address _erc20Address, uint256 _amount) public {
     // update footprint to account for this function and its transactions
-    _updateFootprint(2);
+    addFootprint(2);
 
     bool eligibility = checkTokenEligibility(_erc20Address);
     require(eligibility, "Can't deposit this token");
@@ -111,7 +111,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   // @param _amount the amount of BCT you want to redeem for TCO2
   function redeemBCT(address _desiredTCO2, uint256 _amount) public {
     // update footprint to account for this function and its transactions
-    _updateFootprint(3);
+    addFootprint(3);
 
     require(
       _amount <= balances[msg.sender][bctAddress],
@@ -139,7 +139,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   // @param _tco2Address address of the TCO2 you want to retire
   function selfOffset(address _tco2Address) public {
     // update footprint to account for this function and its transactions
-    _updateFootprint(2);
+    addFootprint(2);
 
     bool eligibility = checkTokenEligibility(_tco2Address);
     require(eligibility, "Can't retire this token.");
@@ -164,7 +164,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   // @param _amount how much CO2 you want to offset
   function selfOffset(address _tco2Address, uint256 _amount) public {
     // update footprint to account for this function and its transactions
-    _updateFootprint(2);
+    addFootprint(2);
 
     bool eligibility = checkTokenEligibility(_tco2Address);
     require(eligibility, "Can't retire this token.");
