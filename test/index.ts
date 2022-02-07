@@ -144,7 +144,33 @@ describe("Contract Offsetter POC", function () {
       ).to.be.eql("0.0");
     });
 
-    it("Should retire 1 TCO2 & footprint should be less by 1", async function () {});
+    it("Should retire 1 TCO2 & footprint should be less by 1", async function () {
+      expect(
+        ethers.utils.formatEther(await cop.footprints(myAddress))
+      ).to.be.eql("0.0");
+
+      await deposit(bct, cop, bctAddress, "100.0");
+
+      const redeemTxn = await cop.redeemBCT(
+        tco2Address,
+        ethers.utils.parseEther("10.0")
+      );
+      await redeemTxn.wait();
+
+      expect(
+        ethers.utils.formatEther(await cop.footprints(myAddress))
+      ).to.not.be.eql("0.0");
+
+      const offsetTxn = await cop["selfOffset(address,uint256)"](
+        tco2Address,
+        ethers.utils.parseEther("0.0000018")
+      );
+      await offsetTxn.wait();
+
+      expect(
+        ethers.utils.formatEther(await cop.footprints(myAddress))
+      ).to.be.eql("0.0");
+    });
 
     it("Should be reverted with 'Can't retire this token.'", async function () {});
 
