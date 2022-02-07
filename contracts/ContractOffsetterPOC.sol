@@ -40,7 +40,8 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   // ======================================================================================================
 
 
-  uint256 public footprint = 0;
+  // user => footprint
+  mapping(address => uint256) public footprints;
   address public bctAddress = 0xf2438A14f668b1bbA53408346288f3d7C71c10a1;
   address public contractRegistry = 0x6739D490670B2710dc7E79bB12E455DE33EE1cb6;
   // user => (token => amount)
@@ -120,14 +121,13 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
 
   // for the moment we are using a hardcoded TCO2 per transaction until we have something better
   function _updateFootprint(uint256 _transactions) private returns (uint256) {
-    footprint += _transactions * 36 / 100000000 ; // * 0.00000036
-    return footprint;
+    footprints[msg.sender] += _transactions * 36 / 100000000 ; // * 0.00000036
+    return footprints[msg.sender];
   }
-
-  // TODO function to check user's balance
 
   // @description retire TCO2 so that you offset the carbon used by this contract
   // @param _tco2Address address of the TCO2 you want to retire
+  // TODO Q: user can only retire ALL his footprint at once, should he be able to retire only some of it?
   function selfOffset(address _tco2Address) public {
     // update footprint to account for this function and its transactions
     _updateFootprint(2);
@@ -136,15 +136,18 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
     require(eligibility, "Can't retire this token.");
 
     // require that the contract owns an amount at least equal to the amount we are trying to retire
-    require(footprint <= balances[msg.sender][_tco2Address], "You don't have enough of this TCO2 (deposited).");
+    require(
+      footprints[msg.sender] <= balances[msg.sender][_tco2Address],
+      "You don't have enough of this TCO2 (deposited)."
+    );
 
     // use the TCO contract to retire TCO2
-    ToucanCarbonOffsets(_tco2Address).retire(footprint);
+    ToucanCarbonOffsets(_tco2Address).retire(footprints[msg.sender]);
 
     // reduce amount of TCO2 in the balance sheet of this contract
-    balances[msg.sender][_tco2Address] -= footprint;
+    balances[msg.sender][_tco2Address] -= footprints[msg.sender];
 
     // reset the footprint
-    footprint = 0;
+    footprints[msg.sender] = 0;
   }
 }
