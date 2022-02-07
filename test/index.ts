@@ -132,7 +132,7 @@ describe("Contract Offsetter POC", function () {
       );
       await redeemTxn.wait();
 
-      // TODO this shouldn't be 0.0; _updateFootpring() might not work
+      // TODO this shouldn't be 0.0; _updateFootprint() might not work
       expect(
         ethers.utils.formatEther(await cop.footprints(myAddress))
       ).to.be.eql("213.0");
