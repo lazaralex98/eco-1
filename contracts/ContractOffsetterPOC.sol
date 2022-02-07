@@ -15,17 +15,30 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   using SafeERC20 for IERC20;
   // ======================================================================================================
   // ------------------------------------------    THE STORY   -------------------------------------------
-  // the main/first functionality of this contract is to redeem BCT
-  // then we present a demonstration of how people could
-  //  1. calculate the emissions / footprint of this contract when receiving and redeeming BCT
-  //  2. offset its activities (by using the retireTCO2 function)
+  //  The main/first functionality of this contract is to deposit & redeem BCT for TCO2.
   //
-  // How the calculation of the footprint is done, is still up to discussion. One thing I have found
-  // in my research with Andi is that roughly speaking one transaction on Polygon is equal to
-  // 0.0003 kg of CO2 (which means 0,0000003 TCO2)
+  //  As this contract is used, the contract calculates the footprint of each user
+  //  (meaning the CO2 that was emitted when using this contract).
+  //
+  //  For the moment, we are using a hardcoded 0,0000003 TCO2 per transaction to calculate
+  //  the footprint. The goal is to eventually get a real calculation in place.
+  //
+  //  At any point in time, the user can check the footprint created by his using of this contract.
+  //  And he can also offset that footprint (by retiring TCO2).
+  //
+  //  If the user already has TCO2 in his wallet, he has the possibility to deposit that to this contract
+  //  in order to retire it and offset the footprint.
+  //
+  //  It should be noted, everytime you deposit, or redeem, or offset or do any interaction with this contract:
+  //  that adds to the footprint.
+  //
+  //  TODO each user must have his own separate footprint for this contract
+  //
+  //  And there are some long-term TODOs:
+  //  TODO a function to swap (W)ETH, (W)MATIC or USDC for BCT with Sushiswap
+  //
   // ======================================================================================================
 
-  // TODO if possible (time-wise) eventually make a function to swap (W)ETH, (W)MATIC or USDC for BCT with Sushiswap
 
   uint256 public footprint = 0;
   address public bctAddress = 0xf2438A14f668b1bbA53408346288f3d7C71c10a1;
@@ -110,6 +123,8 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
     footprint += _transactions * 36 / 100000000 ; // * 0.00000036
     return footprint;
   }
+
+  // TODO function to check user's balance
 
   // @description retire TCO2 so that you offset the carbon used by this contract
   // @param _tco2Address address of the TCO2 you want to retire
