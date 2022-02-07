@@ -32,8 +32,6 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   //  It should be noted, everytime you deposit, or redeem, or offset or do any interaction with this contract:
   //  that adds to the footprint.
   //
-  //  TODO each user must have his own separate footprint for this contract
-  //
   //  And there are some long-term TODOs:
   //  TODO a function to swap (W)ETH, (W)MATIC or USDC for BCT with Sushiswap
   //
