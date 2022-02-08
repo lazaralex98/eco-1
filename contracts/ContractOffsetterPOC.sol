@@ -46,10 +46,22 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   address public contractRegistry = 0x6739D490670B2710dc7E79bB12E455DE33EE1cb6;
   // user => (token => amount)
   mapping(address => mapping(address => uint256)) public balances;
+
   event Deposited(
-    address depositorAddress,
+    address depositor,
     address erc20Address,
     uint256 amountDeposited
+  );
+  event Redeemed(
+    address redeemer,
+    address receivedTCO2,
+    uint256 amountRedeemed
+  );
+  event Offset(
+    address offsetter,
+    address retiredTCO2,
+    uint256 amountOffset,
+    uint256 remainingFootprint
   );
 
   // @description you can use this to change the TCO2 contracts registry if needed
@@ -133,6 +145,8 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
     // modify balance sheets of this contract
     balances[msg.sender][bctAddress] -= _amount;
     balances[msg.sender][_desiredTCO2] += _amount;
+
+    emit Redeemed(msg.sender, _desiredTCO2, _amount);
   }
 
   // @description retire TCO2 so that you offset ALL the carbon used by this contract
@@ -155,8 +169,12 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
     // reduce amount of TCO2 in the balance sheet
     balances[msg.sender][_tco2Address] -= footprints[msg.sender];
 
+    uint256 amountOffset = footprints[msg.sender];
+
     // reset the footprint
     footprints[msg.sender] = 0;
+
+    emit Offset(msg.sender, _tco2Address, amountOffset, footprints[msg.sender]);
   }
 
   // @description retire TCO2 so that you offset a certain amount of the carbon used by this contract
@@ -187,5 +205,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
 
     // reduce the footprint
     footprints[msg.sender] -= _amount;
+
+    emit Offset(msg.sender, _tco2Address, _amount, footprints[msg.sender]);
   }
 }
