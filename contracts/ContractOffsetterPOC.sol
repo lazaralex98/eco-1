@@ -46,6 +46,7 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   address public contractRegistry = 0x6739D490670B2710dc7E79bB12E455DE33EE1cb6;
   // user => (token => amount)
   mapping(address => mapping(address => uint256)) public balances;
+  // user => [contractToOffset1, contractToOffset2, contractToOffset3]
 
   event Deposited(
     address depositor,
@@ -78,6 +79,16 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   function addFootprint(uint256 _transactions) private {
     footprints[msg.sender] += 360000000000 * _transactions; // 0,00000036 TCO2 per transaction
   }
+
+  function addContract(address _contractToAdd) public {
+    // TODO store this contract for this user
+  }
+
+  function addEvents() public {
+    // TODO store these events for this user (maybe also for a certain contract)
+  }
+
+  // TODO Q: how do you track how many transactions these contracts/events equate to
 
   // @description checks if token to be deposited is eligible for this pool
   // @param _erc20Address address to be checked
