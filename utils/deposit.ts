@@ -12,7 +12,7 @@ const deposit = async (
   tokenAddress: string,
   amount: string
 ): Promise<ContractTransaction> => {
-  // first we use have the TCO2 contract approve up to 1 unit to be used by the COP contract
+  // first have the token contract approve the COP contract
   await (
     await tokenContract.approve(cop.address, ethers.utils.parseEther(amount))
   ).wait();
