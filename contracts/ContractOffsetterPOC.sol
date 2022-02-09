@@ -45,7 +45,6 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   address public contractRegistry = 0x6739D490670B2710dc7E79bB12E455DE33EE1cb6;
   // user => (token => amount)
   mapping(address => mapping(address => uint256)) public balances;
-  // user => [contractToOffset1, contractToOffset2, contractToOffset3]
 
   event Deposited(
     address depositor,
