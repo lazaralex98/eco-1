@@ -35,7 +35,6 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   //  that adds to the footprint.
   //
   //  And there are some long-term TODOs:
-  //  TODO addContract(), addEvents(); documented here: https://linear.app/toucan/issue/ECO-22/mycontractoffsetter-my-personal-offsetting-contract
   //  TODO a function to swap (W)ETH, (W)MATIC or USDC for BCT with Sushiswap
   //
   // ======================================================================================================
@@ -79,16 +78,6 @@ contract ContractOffsetterPOC is OwnableUpgradeable {
   function addFootprint(uint256 _transactions) private {
     footprints[msg.sender] += 360000000000 * _transactions; // 0,00000036 TCO2 per transaction
   }
-
-  function addContract(address _contractToAdd) public {
-    // TODO store this contract for this user
-  }
-
-  function addEvents() public {
-    // TODO store these events for this user (maybe also for a certain contract)
-  }
-
-  // TODO Q: how do you track how many transactions these contracts/events equate to
 
   // @description checks if token to be deposited is eligible for this pool
   // @param _erc20Address address to be checked
