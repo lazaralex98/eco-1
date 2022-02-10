@@ -105,7 +105,7 @@ contract ContractOffsetter is OwnableUpgradeable {
         emit Redeemed(msg.sender, _desiredTCO2, _amount);
     }
 
-    // @description retire TCO2 so that you offset a certain amount of the carbon used by this contract
+    // @description retire TCO2 so that you offset a certain amount of carbon
     // @param _tco2Address address of the TCO2 you want to retire
     // @param _amount how much CO2 you want to offset
     function offset(address _tco2Address, uint256 _amount) public {
