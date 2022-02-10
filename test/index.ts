@@ -309,5 +309,22 @@ describe("Contract Offsetter", function () {
 
   describe("offset", function () {
     // TODO write tests for offset()
+    it("Should retire 1 TCO2'", async function () {
+      const initialSupply = await tco.totalSupply();
+
+      await deposit(bct, co, bctAddress, "1");
+
+      await (
+        await co.redeemBCT(tco2Address, ethers.utils.parseEther("1.0"))
+      ).wait();
+
+      await co.offset(tco2Address, ethers.utils.parseEther("1.0"));
+
+      const endSupply = await tco.totalSupply();
+
+      expect(endSupply).to.be.eql(
+        initialSupply.sub(ethers.utils.parseEther("1.0"))
+      );
+    });
   });
 });
