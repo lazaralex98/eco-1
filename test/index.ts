@@ -309,7 +309,7 @@ describe("Contract Offsetter", function () {
 
   describe("offset", function () {
     // TODO write tests for offset()
-    it("Should retire 1 TCO2'", async function () {
+    it("Should retire 1 TCO2 and set nonces 1 through 10 for the user to true", async function () {
       const initialSupply = await tco.totalSupply();
 
       await deposit(bct, co, bctAddress, "1");
@@ -318,7 +318,16 @@ describe("Contract Offsetter", function () {
         await co.redeemBCT(tco2Address, ethers.utils.parseEther("1.0"))
       ).wait();
 
-      await co.offset(tco2Address, ethers.utils.parseEther("1.0"));
+      await co.offset(tco2Address, ethers.utils.parseEther("1.0"), myAddress, [
+        ...Array(10).keys(),
+      ]);
+
+      expect(
+        await co.nonceStatuses(myAddress, ethers.utils.parseEther("0"))
+      ).to.be.eql(true);
+      expect(
+        await co.nonceStatuses(myAddress, ethers.utils.parseEther("10"))
+      ).to.be.eql(false);
 
       const endSupply = await tco.totalSupply();
 

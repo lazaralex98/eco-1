@@ -28,8 +28,11 @@ contract ContractOffsetter is OwnableUpgradeable {
     event Offset(
         address offsetter,
         address retiredTCO2,
-        uint256 amountOffset
+        uint256 amountOffset,
+        address offsetAddress,
+        uint256[] offsetNonces
     );
+
 
     // @description you can use this to change the TCO2 contracts registry if needed
     // @param _address the contract registry to use
@@ -105,10 +108,13 @@ contract ContractOffsetter is OwnableUpgradeable {
         emit Redeemed(msg.sender, _desiredTCO2, _amount);
     }
 
+    // user/contract => (nonce => true/false)
+    mapping(address => mapping(uint256 => bool)) public nonceStatuses;
+
     // @description retire TCO2 so that you offset a certain amount of carbon
     // @param _tco2Address address of the TCO2 you want to retire
     // @param _amount how much CO2 you want to offset
-    function offset(address _tco2Address, uint256 _amount) public {
+    function offset(address _tco2Address, uint256 _amount, address offsetAddress, uint256[] memory offsetNonces) public {
         bool eligibility = checkTokenEligibility(_tco2Address);
         require(eligibility, "Can't retire this token.");
 
@@ -117,12 +123,20 @@ contract ContractOffsetter is OwnableUpgradeable {
             "You don't have enough of this TCO2 (in the contract)."
         );
 
+        // TODO should I check if the nonces exist or are true already?
+
         // use the TCO contract to retire TCO2
         ToucanCarbonOffsets(_tco2Address).retire(_amount);
 
         // reduce amount of TCO2 in the balance sheet
         balances[msg.sender][_tco2Address] -= _amount;
 
-        emit Offset(msg.sender, _tco2Address, _amount);
+        // TODO update nonce statuses
+        for (uint256 i = 0; i < offsetNonces.length; i++) {
+            nonceStatuses[offsetAddress][offsetNonces[i]] = true;
+        }
+
+        emit Offset(msg.sender, _tco2Address, _amount, offsetAddress, offsetNonces);
     }
+    // TODO do some deep thinking on the explanation I've made in the slack message to Marcel and James
 }
