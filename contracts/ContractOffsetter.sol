@@ -33,7 +33,6 @@ contract ContractOffsetter is OwnableUpgradeable {
         uint256[] offsetNonces
     );
 
-
     // @description you can use this to change the TCO2 contracts registry if needed
     // @param _address the contract registry to use
     function setToucanContractRegistry(address _address)
@@ -131,12 +130,10 @@ contract ContractOffsetter is OwnableUpgradeable {
         // reduce amount of TCO2 in the balance sheet
         balances[msg.sender][_tco2Address] -= _amount;
 
-        // TODO update nonce statuses
         for (uint256 i = 0; i < offsetNonces.length; i++) {
             nonceStatuses[offsetAddress][offsetNonces[i]] = true;
         }
 
         emit Offset(msg.sender, _tco2Address, _amount, offsetAddress, offsetNonces);
     }
-    // TODO do some deep thinking on the explanation I've made in the slack message to Marcel and James
 }
