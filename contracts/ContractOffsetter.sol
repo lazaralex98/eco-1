@@ -14,6 +14,8 @@ contract ContractOffsetter is OwnableUpgradeable {
     address public contractRegistry = 0x6739D490670B2710dc7E79bB12E455DE33EE1cb6;
     // user => (token => amount)
     mapping(address => mapping(address => uint256)) public balances;
+    // user/contract => nonce of last offset
+    mapping(address => uint256) public lastOffsetNonce;
 
     event Deposited(
         address depositor,
@@ -30,7 +32,7 @@ contract ContractOffsetter is OwnableUpgradeable {
         address retiredTCO2,
         uint256 amountOffset,
         address offsetAddress,
-        uint256[] offsetNonces
+        uint256 latestOffsetNonce
     );
 
     // @description you can use this to change the TCO2 contracts registry if needed
@@ -107,13 +109,12 @@ contract ContractOffsetter is OwnableUpgradeable {
         emit Redeemed(msg.sender, _desiredTCO2, _amount);
     }
 
-    // user/contract => (nonce => true/false)
-    mapping(address => mapping(uint256 => bool)) public nonceStatuses;
-
     // @description retire TCO2 so that you offset a certain amount of carbon
     // @param _tco2Address address of the TCO2 you want to retire
     // @param _amount how much CO2 you want to offset
-    function offset(address _tco2Address, uint256 _amount, address offsetAddress, uint256[] memory offsetNonces) public {
+    // @param _offsetAddress the address that is targeted in the offset
+    // @param _nonce the latest nonce that we'll offset
+    function offset(address _tco2Address, uint256 _amount, address _offsetAddress, uint256 _nonce) public {
         bool eligibility = checkTokenEligibility(_tco2Address);
         require(eligibility, "Can't retire this token.");
 
@@ -122,18 +123,15 @@ contract ContractOffsetter is OwnableUpgradeable {
             "You don't have enough of this TCO2 (in the contract)."
         );
 
-        // TODO should I check if the nonces exist or are true already?
-
         // use the TCO contract to retire TCO2
         ToucanCarbonOffsets(_tco2Address).retire(_amount);
 
         // reduce amount of TCO2 in the balance sheet
         balances[msg.sender][_tco2Address] -= _amount;
 
-        for (uint256 i = 0; i < offsetNonces.length; i++) {
-            nonceStatuses[offsetAddress][offsetNonces[i]] = true;
-        }
+        // set new last offset nonce
+        lastOffsetNonce[_offsetAddress] = _nonce;
 
-        emit Offset(msg.sender, _tco2Address, _amount, offsetAddress, offsetNonces);
+        emit Offset(msg.sender, _tco2Address, _amount, _offsetAddress, _nonce);
     }
 }
