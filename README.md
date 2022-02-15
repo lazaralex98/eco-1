@@ -20,6 +20,33 @@ Moving on, there are 3 main methods that this contracth as:
 - `redeemBCT()`
 - `offset()`
 
-Let's pick them one at a time.
+Let's pick them one at a time. We'll tackle the less important ones at the end.
 
 ## deposit()
+
+```solidity
+function deposit(address _erc20Address, uint256 _amount) public {
+  bool eligibility = checkTokenEligibility(_erc20Address);
+  require(eligibility, "Can't deposit this token");
+
+  // use token's contract to do a safe transfer from the user to this contract
+  // remember that the user has to approve this in the frontend
+  IERC20(_erc20Address).safeTransferFrom(msg.sender, address(this), _amount);
+
+  // add amount of said token to balance of this user in this contract
+  balances[msg.sender][_erc20Address] += _amount;
+
+  emit Deposited(msg.sender, _erc20Address, _amount);
+}
+
+```
+
+This function takes in as parameters the address of the token and the amount to be deposited.
+
+It checks the token for eligibility and then uses the `safeTransferFrom()` method of the `SafeERC20` OpenZeppelin contract.
+
+_Side note: it's important to know that whoever calls this method has to first approve the `ContractOffseter` from the contract of the token to be deposited._
+
+Next up, it updates the `balances` which is a nested mapping with the following structure: **user => (token => amount)**.
+
+And it lastly emits an event.
