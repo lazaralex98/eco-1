@@ -171,4 +171,4 @@ What does it do? It returns `true` if the address provided is either BCT or a va
 
 ## Thanks for reading
 
-If you want to check out the README for the dapp sorrounding this contract, go [here](htthttps://github.com/lazaralex98/contract-offsetter-ui/blob/main/README.md).
+If you want to check out the README for the dapp sorrounding this contract, go [here](https://github.com/lazaralex98/contract-offsetter-ui/blob/main/README.md).
