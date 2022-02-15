@@ -47,6 +47,6 @@ It checks the token for eligibility and then uses the `safeTransferFrom()` metho
 
 _Side note: it's important to know that whoever calls this method has to first approve the `ContractOffseter` from the contract of the token to be deposited._
 
-Next up, it updates the `balances` which is a nested mapping with the following structure: **user => (token => amount)**.
+Next up, it updates the `balances` which is a nested mapping with the following structure: **`user => (token => amount)`**.
 
 And it lastly emits an event.
