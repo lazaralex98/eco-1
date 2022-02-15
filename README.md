@@ -137,3 +137,38 @@ We also update the `lastOffsetNonce` mapping which has the following structure: 
 Lastly, we emit an event.
 
 ## Other, 'less important' methods
+
+```solidity
+function setToucanContractRegistry(address _address) public virtual onlyOwner {
+  contractRegistry = _address;
+}
+
+function checkTokenEligibility(address _erc20Address)
+  private
+  view
+  returns (bool)
+{
+  // check if token is a TCO2
+  bool isToucanContract = IToucanContractRegistry(contractRegistry).checkERC20(
+    _erc20Address
+  );
+  if (isToucanContract) return true;
+
+  // check if token is BCT
+  if (_erc20Address == bctAddress) return true;
+
+  // nothing matches, return false
+  return false;
+}
+
+```
+
+You can see here the `setToucanContractRegistry()` method, which the user will never use (as it's an onlyOwner method). It's used in case the `ToucanContractRegistry` (containing eligible TCO2s) ever changes.
+
+You can also see the `checkTokenEligibility()` method, which the user will never call himself, but it is used in the main functions I presented earlier.
+
+What does it do? It returns `true` if the address provided is either BCT or a valid TCO2. And returns `false` if not.
+
+## Thanks for reading
+
+If you want to check out the README for the dapp sorrounding this contract, go [here](htthttps://github.com/lazaralex98/contract-offsetter-ui/blob/main/README.md).
