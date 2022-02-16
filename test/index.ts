@@ -311,6 +311,9 @@ describe("Contract Offsetter", function () {
     it("Should retire 1 TCO2 and set nonces 1 through 10 for the user to true", async function () {
       const initialSupply = await tco.totalSupply();
 
+      const initialOffsetAmount = await co.overallOffsetAmount(myAddress);
+      expect(ethers.utils.formatEther(initialOffsetAmount)).to.be.eql("0.0");
+
       await deposit(bct, co, bctAddress, "1");
 
       await (
@@ -333,6 +336,9 @@ describe("Contract Offsetter", function () {
       expect(endSupply).to.be.eql(
         initialSupply.sub(ethers.utils.parseEther("1.0"))
       );
+
+      const endOffsetAmount = await co.overallOffsetAmount(myAddress);
+      expect(ethers.utils.formatEther(endOffsetAmount)).to.be.eql("1.0");
     });
   });
 });

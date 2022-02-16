@@ -16,6 +16,8 @@ contract ContractOffsetter is OwnableUpgradeable {
     mapping(address => mapping(address => uint256)) public balances;
     // user/contract => nonce of last offset
     mapping(address => uint256) public lastOffsetNonce;
+    // user => amount they've offset ever
+    mapping(address => uint256) public overallOffsetAmount;
 
     event Deposited(
         address depositor,
@@ -131,6 +133,9 @@ contract ContractOffsetter is OwnableUpgradeable {
 
         // set new last offset nonce
         lastOffsetNonce[_offsetAddress] = _nonce;
+
+        // add to the amount the person has offset ever
+        overallOffsetAmount[msg.sender] += _amount;
 
         emit Offset(msg.sender, _tco2Address, _amount, _offsetAddress, _nonce);
     }
